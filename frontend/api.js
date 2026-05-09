@@ -523,11 +523,6 @@ function initialsAvatarDataUrl(initials) {
 }
 
 function enableSidebarAvatarUpload({ role, initials }) {
-  // Farmer dashboard: keep avatar static (no "Change photo" tooltip / upload).
-  if (role === 'farmer' && String(window.location?.pathname || '').toLowerCase().includes('farmerdashboard.html')) {
-    return;
-  }
-
   const endpoint = profileEndpointForRole(role);
   if (!endpoint) return;
 
