@@ -1,7 +1,7 @@
 'use strict';
 
 // Hardcoded for local dev — no dotenv needed
-const MONGO_URI = 'mongodb://localhost:27017/plantdoc';
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/plantdoc_dev';
 
 const mongoose = require('mongoose');
 const Product = require('./models/Product');

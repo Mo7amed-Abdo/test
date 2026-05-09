@@ -1,7 +1,7 @@
 // ─── PlantDoc Shared API Utility ─────────────────────────────────────────────
 // Used by every page across all roles. Load this FIRST on every page.
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = 'http://localhost:4000/api';
 
 function ensureBrandLogoTheme() {
   if (!document.head) return;

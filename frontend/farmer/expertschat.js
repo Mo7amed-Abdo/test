@@ -639,7 +639,7 @@ function connectSocket() {
     console.warn('[FarmerChat] Socket.IO CDN not loaded');
     return;
   }
-  _socket = io('http://localhost:5000', { auth: { token: Auth.getToken() } });
+  _socket = io('http://localhost:4000', { auth: { token: Auth.getToken() } });
   _socket.on('connect', () => {
     if (_activeChatId) _socket.emit('chat:join', { conversationId: _activeChatId });
   });

@@ -13,7 +13,7 @@ required.forEach((key) => {
 
 module.exports = {
   NODE_ENV: process.env.NODE_ENV || 'development',
-  PORT: parseInt(process.env.PORT, 10) || 5000,
+  PORT: parseInt(process.env.PORT, 10) || 4000,
 
   MONGO_URI: process.env.MONGO_URI,
 
@@ -26,7 +26,7 @@ module.exports = {
 
   ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS
     ? process.env.ALLOWED_ORIGINS.split(',').map((o) => o.trim())
-    : ['http://localhost:5000', 'http://localhost:3000'],
+    : ['http://localhost:4000', 'http://localhost:3000'],
 
   AI_SERVICE_URL: process.env.AI_SERVICE_URL || 'http://localhost:8000/predict',
   AI_SERVICE_TIMEOUT: parseInt(process.env.AI_SERVICE_TIMEOUT, 10) || 10000,
