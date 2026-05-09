@@ -18,18 +18,14 @@ app.use(helmet({
 }));
 
 // ─── CORS ─────────────────────────────────────────────────────────────────────
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin) return callback(null, true);
-      if (env.ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
-      callback(new Error(`CORS: Origin ${origin} not allowed`));
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  })
-);
+// Fixes preflight OPTIONS returning 500 in hosted environments (Railway/Vercel).
+// Temporarily allow all origins (reflected) with credentials during development/iteration.
+// IMPORTANT: Do not throw errors in origin callbacks; preflight must always succeed.
+app.use(cors({
+  origin: true,
+  credentials: true,
+}));
+app.options('*', cors());
 
 // ─── Body Parsing ─────────────────────────────────────────────────────────────
 app.use(express.json({ limit: '10mb' }));
