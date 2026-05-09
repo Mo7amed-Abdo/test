@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Completed Orders - PlantDoc</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./delivery-sidebar.css" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-container": "#eceeef",
+                        "surface-variant": "#e1e3e4",
+                        "on-background": "#191c1d",
+                        "background": "#f8fafb",
+                        "primary": "#006a39",
+                        "on-tertiary-fixed": "#40000f",
+                        "outline-variant": "#bdcabc",
+                        "on-error-container": "#93000a",
+                        "surface-container-low": "#f2f4f5",
+                        "secondary-container": "#c6e4f4",
+                        "on-error": "#ffffff",
+                        "on-primary-fixed": "#00210e",
+                        "surface-container-lowest": "#ffffff",
+                        "error": "#ba1a1a",
+                        "tertiary-fixed": "#ffdadb",
+                        "on-surface-variant": "#3e4a3f",
+                        "primary-fixed-dim": "#64dd91",
+                        "outline": "#6d7a6f",
+                        "inverse-on-surface": "#eff1f2",
+                        "secondary-fixed-dim": "#adcbda",
+                        "inverse-surface": "#2e3132",
+                        "surface-tint": "#006d3a",
+                        "tertiary": "#a23546",
+                        "on-secondary": "#ffffff",
+                        "surface": "#f8fafb",
+                        "secondary": "#466270",
+                        "primary-fixed": "#82faab",
+                        "tertiary-container": "#c24d5e",
+                        "surface-dim": "#d8dadb",
+                        "surface-container-highest": "#e1e3e4",
+                        "on-tertiary-fixed-variant": "#851f33",
+                        "on-secondary-container": "#4a6774",
+                        "surface-bright": "#f8fafb",
+                        "on-secondary-fixed": "#001f2a",
+                        "surface-container-high": "#e6e8e9",
+                        "error-container": "#ffdad6",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb2b8",
+                        "on-primary-fixed-variant": "#00522b",
+                        "on-surface": "#191c1d",
+                        "secondary-fixed": "#c9e7f7",
+                        "on-secondary-fixed-variant": "#2e4b57",
+                        "on-primary-container": "#f6fff4",
+                        "primary-container": "#008649",
+                        "on-tertiary-container": "#fffbff",
+                        "on-tertiary": "#ffffff",
+                        "inverse-primary": "#64dd91"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .date-pill.active {
+            background-color: #006a39;
+            color: #ffffff;
+            border-color: #006a39;
+        }
+
+        /* Completed order card */
+        @keyframes cardFadeUp {
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .order-card {
+            animation: cardFadeUp 0.38s cubic-bezier(.22,.68,0,1.2) both;
+        }
+        .order-card:hover {
+            box-shadow: 0 12px 36px -8px rgba(0,106,57,0.15), 0 4px 12px -4px rgba(0,0,0,0.06);
+        }
+        .icon-chip {
+            display: flex; align-items: center; justify-content: center;
+            width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
+        }
+        .star-filled { color: #f59e0b; font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .star-empty  { color: #d1d5db; font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24; }
+    </style>
+</head>
+
+<body class="bg-background text-on-background min-h-screen flex font-body">
+
+    <nav class="delivery-sidebar bg-slate-50 text-green-600 font-inter text-sm font-medium fixed h-screen w-64 left-0 top-0 border-r border-slate-200 flex-col gap-2 hidden md:flex z-50">
+        <div class="flex items-center gap-1">
+            <div class="flex items-center">
+                <img src="logo dark.png" alt="" class="w-26 h-28">
+            </div>
+            <span class="text-lg font-bold text-green-700">PlantDoc</span>
+        </div>
+
+        <div class="flex-1 flex flex-col gap-1 px-4 pt-3">
+            <a class="text-slate-600 rounded-lg p-3 flex items-center gap-3 hover:bg-slate-200 transition-all active:scale-[0.98]" href="deliverydashboard.html">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span>Dashboard</span>
+            </a>
+            <a class="text-slate-600 rounded-lg p-3 flex items-center gap-3 hover:bg-slate-200 transition-all active:scale-[0.98]" href="activedelivery.html">
+                <span class="material-symbols-outlined">local_shipping</span>
+                <span>Active Orders</span>
+            </a>
+            <a class="bg-green-700 text-white rounded-xl p-3 flex items-center gap-3 active:scale-[0.98] transition-transform" href="deliveryCompletedorders.html">
+                <span class="material-symbols-outlined fill">task_alt</span>
+                <span>Completed Orders</span>
+            </a>
+            <a class="text-slate-600 rounded-lg p-3 flex items-center gap-3 hover:bg-slate-200 transition-all active:scale-[0.98]" href="notificationsdelivery.html">
+                <span class="material-symbols-outlined">notifications</span>
+                <span>Notifications</span>
+            </a>
+            <a class="text-slate-600 rounded-lg p-3 flex items-center gap-3 hover:bg-slate-200 transition-all active:scale-[0.98]" href="deliveryprofile.html">
+                <span class="material-symbols-outlined">person</span>
+                <span>Profile</span>
+            </a>
+        </div>
+
+        <!-- Profile card -->
+        <div class="mt-auto pt-4 border-t border-slate-200 px-4 pb-5">
+            <a class="rounded-xl px-3 py-2.5 flex items-center gap-3 bg-gradient-to-r from-green-100 to-emerald-50 border border-green-200 hover:from-green-200 hover:to-emerald-100 transition-all active:scale-[0.98] shadow-sm"
+                href="deliveryprofile.html">
+                <img src="" class="w-9 h-9 rounded-full object-cover border-2 border-white shadow-sm shrink-0" alt="Profile"
+                    data-user-avatar />
+                <div class="flex flex-col min-w-0">
+                    <span class="font-bold text-green-900 text-sm truncate" data-user-name>Loading...</span>
+                    <span class="text-xs text-green-700 truncate" data-user-role>Loading...</span>
+                </div>
+                <button class="ml-auto text-green-700 hover:text-green-900 transition-colors">
+                    <span class="material-symbols-outlined text-lg">logout</span>
+                </button>
+            </a>
+        </div>
+
+    </nav>
+
+    <main class="flex-1 flex flex-col md:ml-64 w-full">
+        <header class="md:hidden sticky top-0 z-40 flex h-16 w-full items-center justify-between px-4 bg-gray-50 border-b border-slate-200 shadow-sm">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined fill text-primary text-2xl">spa</span>
+                <h1 class="text-xl font-bold text-green-700">PlantDoc</h1>
+            </div>
+            <div class="flex items-center gap-2">
+                <button class="p-2 text-slate-500 hover:text-green-600 transition-colors active:scale-95 rounded-full hover:bg-surface-container-highest">
+                    <span class="material-symbols-outlined">notifications</span>
+                </button>
+                <button class="p-2 text-slate-500 hover:text-green-600 transition-colors active:scale-95 rounded-full hover:bg-surface-container-highest">
+                    <span class="material-symbols-outlined">account_circle</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="p-6 md:p-8 flex-1 overflow-y-auto">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+                <div class="shrink-0">
+                    <h2 class="text-2xl font-bold text-on-surface">
+                        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-green-200/80 bg-gradient-to-r from-green-50 via-emerald-50 to-green-100 shadow-sm text-green-700">
+                            <span class="material-symbols-outlined text-[18px]">task_alt</span>
+                            <span>Completed Orders</span>
+                        </span>
+                    </h2>
+                </div>
+
+                <div class="flex items-center gap-3 flex-wrap">
+                    <div class="flex items-center gap-2 bg-surface-container-lowest border border-surface-variant rounded-[12px] p-1.5">
+                        <span class="text-xs font-medium text-on-surface-variant px-2 hidden sm:block">Date:</span>
+                        <button class="date-pill active px-3 py-1.5 rounded-lg text-xs font-semibold border border-transparent transition-all duration-200 active:scale-[0.97]" data-period="7">
+                            7 Days
+                        </button>
+                        <button class="date-pill px-3 py-1.5 rounded-lg text-xs font-semibold border border-transparent text-on-surface-variant hover:bg-surface-container transition-all duration-200 active:scale-[0.97]" data-period="30">
+                            30 Days
+                        </button>
+                        <button class="date-pill px-3 py-1.5 rounded-lg text-xs font-semibold border border-transparent text-on-surface-variant hover:bg-surface-container transition-all duration-200 active:scale-[0.97]" data-period="60">
+                            60 Days
+                        </button>
+                        <button class="date-pill px-3 py-1.5 rounded-lg text-xs font-semibold border border-transparent text-on-surface-variant hover:bg-surface-container transition-all duration-200 active:scale-[0.97]" data-period="all">
+                            All Time
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 rounded-xl border-t-2 border-primary pt-2" data-completed-grid>
+                <p class="col-span-full text-center text-on-surface-variant py-16">Loading completed orders...</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.querySelectorAll('.date-pill').forEach((pill) => {
+            pill.addEventListener('click', () => {
+                document.querySelectorAll('.date-pill').forEach((p) => {
+                    p.classList.remove('active');
+                    p.classList.add('text-on-surface-variant');
+                    p.style.backgroundColor = '';
+                    p.style.color = '';
+                    p.style.borderColor = '';
+                });
+                pill.classList.add('active');
+                pill.classList.remove('text-on-surface-variant');
+            });
+        });
+    </script>
+
+    <script src="../api.js"></script>
+    <script src="./delivery-sidebar.js"></script>
+    <script src="./deliverycompletedorders.js"></script>
+</body>
+</html>

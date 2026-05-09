@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>PlantDoc - Delivery Dashboard</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <link href="/frontend/common-panels.css" rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-container": "#eceeef",
+                        "surface-variant": "#e1e3e4",
+                        "on-background": "#191c1d",
+                        "background": "#f8fafb",
+                        "primary": "#006a39",
+                        "on-tertiary-fixed": "#40000f",
+                        "outline-variant": "#bdcabc",
+                        "on-error-container": "#93000a",
+                        "surface-container-low": "#f2f4f5",
+                        "secondary-container": "#c6e4f4",
+                        "on-error": "#ffffff",
+                        "on-primary-fixed": "#00210e",
+                        "surface-container-lowest": "#ffffff",
+                        "error": "#ba1a1a",
+                        "tertiary-fixed": "#ffdadb",
+                        "on-surface-variant": "#3e4a3f",
+                        "primary-fixed-dim": "#64dd91",
+                        "outline": "#6d7a6f",
+                        "inverse-on-surface": "#eff1f2",
+                        "secondary-fixed-dim": "#adcbda",
+                        "inverse-surface": "#2e3132",
+                        "surface-tint": "#006d3a",
+                        "tertiary": "#a23546",
+                        "on-secondary": "#ffffff",
+                        "surface": "#f8fafb",
+                        "secondary": "#466270",
+                        "primary-fixed": "#82faab",
+                        "tertiary-container": "#c24d5e",
+                        "surface-dim": "#d8dadb",
+                        "surface-container-highest": "#e1e3e4",
+                        "on-tertiary-fixed-variant": "#851f33",
+                        "on-secondary-container": "#4a6774",
+                        "surface-bright": "#f8fafb",
+                        "on-secondary-fixed": "#001f2a",
+                        "surface-container-high": "#e6e8e9",
+                        "error-container": "#ffdad6",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb2b8",
+                        "on-primary-fixed-variant": "#00522b",
+                        "on-surface": "#191c1d",
+                        "secondary-fixed": "#c9e7f7",
+                        "on-secondary-fixed-variant": "#2e4b57",
+                        "on-primary-container": "#f6fff4",
+                        "primary-container": "#008649",
+                        "on-tertiary-container": "#fffbff",
+                        "on-tertiary": "#ffffff",
+                        "inverse-primary": "#64dd91"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        /* ── Van track ── */
+        .hdr-car-wrap {
+            position: absolute;
+            top: 0; bottom: 0;
+            left: 0; right: 0;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+        @media (min-width: 768px) {
+            .hdr-car-wrap { left: 248px; right: 54px; }
+        }
+
+        .hdr-car-road {
+            position: absolute;
+            left: 0; right: 0;
+            bottom: 2px;
+            border-bottom: 2px dashed rgba(0, 106, 57, 0.30);
+        }
+
+        .hdr-car-el {
+            position: absolute;
+            bottom: 2px;
+            left: 0;
+            display: flex;
+            align-items: flex-end;
+            will-change: transform;
+        }
+
+        .hdr-speed-lines {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 4px;
+            margin-bottom: 18px;
+            margin-right: 2px;
+            flex-shrink: 0;
+        }
+        .hdr-speed-lines span {
+            display: block;
+            height: 2px;
+            border-radius: 999px;
+            background: rgba(0, 106, 57, 0.25);
+        }
+        .hdr-speed-lines span:nth-child(1) { width: 28px; }
+        .hdr-speed-lines span:nth-child(2) { width: 20px; opacity: 0.7; }
+        .hdr-speed-lines span:nth-child(3) { width: 13px; opacity: 0.45; }
+
+        .hdr-car-wheel {
+            transform-origin: center;
+            animation: hdrWheelSpin 0.35s linear infinite;
+        }
+        @keyframes hdrWheelSpin {
+            to { transform: rotate(360deg); }
+        }
+
+        .hdr-car-body {
+            animation: hdrBounce 0.4s ease-in-out infinite alternate;
+            transform-origin: bottom center;
+        }
+        @keyframes hdrBounce {
+            from { transform: translateY(0); }
+            to   { transform: translateY(-2px); }
+        }
+
+        /* ── STAT CARD — smooth expert-style hover ── */
+        .stat-card {
+            position: relative;
+            isolation: isolate;
+            overflow: hidden;
+            transform: translateZ(0);
+            /* ↓ same timing as expert dashboard */
+            transition: transform .18s cubic-bezier(.2,.8,.2,1),
+                        box-shadow .18s cubic-bezier(.2,.8,.2,1),
+                        border-color .18s ease;
+            animation: statCardIn 720ms cubic-bezier(.2,.8,.2,1) both;
+        }
+        .stat-card::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity .18s ease;
+            background: radial-gradient(120% 90% at 0% 0%, rgba(0,106,57,.10) 0%, rgba(0,106,57,0) 55%);
+        }
+        /* ↓ translateY(-4px) only — same as expert */
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 22px 50px rgba(25,28,29,.10), 0 8px 18px rgba(25,28,29,.06);
+            border-color: rgba(0,106,57,.18);
+        }
+        .stat-card:hover::after { opacity: 1; }
+        .stat-card:active {
+            transform: translateY(-2px);
+        }
+        .stat-icon {
+            transition: transform .18s cubic-bezier(.2,.8,.2,1), box-shadow .18s ease;
+        }
+        .stat-card:hover .stat-icon {
+            transform: translateY(-3px) scale(1.04);
+            box-shadow: 0 12px 28px rgba(0,106,57,.10);
+        }
+        .stat-badge {
+            animation: badgePulse 2.1s ease-in-out infinite;
+        }
+        .stat-value {
+            background: linear-gradient(90deg, #191c1d 0%, #006a39 48%, #191c1d 100%);
+            background-size: 220% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: valueShine 3.6s linear infinite;
+        }
+        .stat-orb {
+            transition: transform .18s cubic-bezier(.2,.8,.2,1), opacity .18s ease;
+        }
+        .stat-card:hover .stat-orb {
+            transform: scale(1.18) translate(-6px, 6px);
+            opacity: .9;
+        }
+        .stat-card:nth-child(1) { animation-delay: 0ms; }
+        .stat-card:nth-child(2) { animation-delay: 110ms; }
+        .stat-card:nth-child(3) { animation-delay: 220ms; }
+        .stat-card:nth-child(4) { animation-delay: 330ms; }
+        @keyframes statCardIn {
+            from { opacity: 0; transform: translateY(18px) scale(.985); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes iconFloat {
+            0%, 100% { translate: 0 0; }
+            50% { translate: 0 -4px; }
+        }
+        @keyframes badgePulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0,106,57,0); }
+            50% { box-shadow: 0 0 0 7px rgba(0,106,57,.08); }
+        }
+        @keyframes valueShine {
+            0% { background-position: 200% 0; }
+            100% { background-position: -20% 0; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .stat-card,
+            .stat-icon,
+            .stat-badge,
+            .stat-value,
+            .hdr-car-wheel,
+            .hdr-car-body {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-background text-on-background min-h-screen flex font-body">
+
+    <!-- SideNavBar -->
+    <nav class="bg-slate-50 text-green-600 font-inter text-sm font-medium fixed h-screen w-64 left-0 top-0 border-r border-slate-200 flex-col gap-2 hidden md:flex z-50">
+        <div class="flex items-center gap-1">
+            <div class="flex items-center">
+                <img src="logo dark.png" alt="" class="w-26 h-28">
+            </div>
+            <span class="text-lg font-bold text-green-700">PlantDoc</span>
+        </div>
+        <div class="flex-1 flex flex-col gap-1 px-4 pt-3">
+            <a class="bg-green-700 text-white rounded-xl p-3 flex items-center gap-3 active:scale-[0.98] transition-transform" href="#">
+                <span class="material-symbols-outlined fill">dashboard</span>
+                <span>Dashboard</span>
+            </a>
+            <a class="text-slate-600 rounded-lg p-3 flex items-center gap-3 hover:bg-slate-200 transition-all active:scale-[0.98]" href="activedelivery.html">
+                <span class="material-symbols-outlined">local_shipping</span>
+                <span>Active Orders</span>
+            </a>
+            <a class="text-slate-600 rounded-lg p-3 flex items-center gap-3 hover:bg-slate-200 transition-all active:scale-[0.98]" href="deliveryCompletedorders.html">
+                <span class="material-symbols-outlined">task_alt</span>
+                <span>Completed Orders</span>
+            </a>
+            <a class="text-slate-600 rounded-lg p-3 flex items-center gap-3 hover:bg-slate-200 transition-all active:scale-[0.98]" href="notificationsdelivery.html">
+                <span class="material-symbols-outlined">notifications</span>
+                <span>Notifications</span>
+            </a>
+            <a class="text-slate-600 rounded-lg p-3 flex items-center gap-3 hover:bg-slate-200 transition-all active:scale-[0.98]" href="deliveryprofile.html">
+                <span class="material-symbols-outlined">person</span>
+                <span>Profile</span>
+            </a>
+        </div>
+        <div class="mt-auto pt-4 border-t border-slate-200 px-4 pb-5">
+            <a class="rounded-xl px-3 py-2.5 flex items-center gap-3 bg-gradient-to-r from-green-100 to-emerald-50 border border-green-200 hover:from-green-200 hover:to-emerald-100 transition-all active:scale-[0.98] shadow-sm" href="deliveryprofile.html">
+                <img src="" class="w-9 h-9 rounded-full object-cover border-2 border-white shadow-sm shrink-0" alt="Profile" data-user-avatar />
+                <div class="flex flex-col min-w-0">
+                    <span class="font-bold text-green-900 text-sm truncate" data-user-name>Loading...</span>
+                    <span class="text-xs text-green-700 truncate" data-user-role>Loading...</span>
+                </div>
+                <button class="ml-auto text-green-700 hover:text-green-900 transition-colors">
+                    <span class="material-symbols-outlined text-lg">logout</span>
+                </button>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col md:ml-64 w-full">
+
+        <!-- Mobile Header -->
+        <header class="md:hidden sticky top-0 z-40 flex h-16 w-full items-center justify-between px-4 bg-gray-50 border-b border-slate-200 shadow-sm">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined fill text-primary text-2xl">spa</span>
+                <h1 class="text-xl font-bold text-green-700">PlantDoc</h1>
+            </div>
+            <div class="flex items-center gap-2">
+                <button class="p-2 text-slate-500 hover:text-green-600 transition-colors active:scale-95 rounded-full hover:bg-surface-container-highest relative">
+                    <span class="material-symbols-outlined">notifications</span>
+                    <span data-notif-dot class="hidden absolute top-1 right-1 w-2 h-2 bg-error rounded-full"></span>
+                </button>
+                <button class="p-2 text-slate-500 hover:text-green-600 transition-colors active:scale-95 rounded-full hover:bg-surface-container-highest">
+                    <span class="material-symbols-outlined">account_circle</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="p-6 md:p-8 flex-1 overflow-y-auto">
+
+            <!-- Page Heading -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 relative min-h-[60px]">
+
+                <!-- ── Delivery Van ── -->
+                <div class="hdr-car-wrap" aria-hidden="true">
+                    <div class="hdr-car-road"></div>
+                    <div class="hdr-car-el" id="hdrVan">
+                        <div class="hdr-speed-lines">
+                            <span></span><span></span><span></span>
+                        </div>
+                        <div class="hdr-car-body">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="80" height="46" viewBox="0 0 80 46" fill="none">
+                                <ellipse cx="40" cy="44.5" rx="30" ry="2.2" fill="rgba(0,0,0,0.08)"/>
+                                <rect x="3" y="6" width="48" height="25" rx="4" fill="#f4a878"/>
+                                <rect x="3" y="6" width="48" height="5" rx="4" fill="rgba(255,255,255,0.22)"/>
+                                <rect x="3" y="27" width="48" height="4" fill="rgba(180,80,20,0.12)"/>
+                                <line x1="3" y1="18" x2="51" y2="18" stroke="rgba(180,80,20,0.12)" stroke-width="1"/>
+                                <circle cx="24" cy="17" r="7.5" fill="rgba(255,255,255,0.22)"/>
+                                <circle cx="24" cy="17" r="5" fill="rgba(255,255,255,0.28)"/>
+                                <rect x="21" y="14.5" width="6" height="1.5" rx="0.7" fill="rgba(200,100,30,0.45)"/>
+                                <rect x="21" y="16.5" width="5" height="1.5" rx="0.7" fill="rgba(200,100,30,0.35)"/>
+                                <rect x="21" y="18.5" width="4" height="1.5" rx="0.7" fill="rgba(200,100,30,0.25)"/>
+                                <rect x="3" y="11" width="3.5" height="8" rx="1.7" fill="#fca5a5" opacity="0.85"/>
+                                <path d="M51 6 L60 6 Q70 6 72 17 L72 31 L51 31 Z" fill="#f09060"/>
+                                <path d="M51 6 L60 6 Q68 6 71 13 L51 13 Z" fill="rgba(255,255,255,0.15)"/>
+                                <path d="M53 8 L60 8 Q68 8 70 17 L70 22 L53 22 Z" fill="rgba(186,224,255,0.62)" stroke="rgba(255,255,255,0.25)" stroke-width="0.5"/>
+                                <path d="M54 9 L60 9 Q66 9 68 14 L54 14 Z" fill="rgba(255,255,255,0.18)"/>
+                                <rect x="52" y="22" width="10" height="7" rx="1.8" fill="rgba(186,224,255,0.45)"/>
+                                <rect x="69" y="13" width="5" height="3.5" rx="1.2" fill="#e07840"/>
+                                <rect x="70" y="13.5" width="3.5" height="2.5" rx="0.8" fill="rgba(186,224,255,0.5)"/>
+                                <rect x="69" y="21" width="4" height="7" rx="2" fill="#fde68a" opacity="0.92"/>
+                                <rect x="69.5" y="22" width="3" height="4" rx="1.2" fill="white" opacity="0.55"/>
+                                <rect x="70" y="29" width="5" height="3" rx="1.2" fill="#d06030"/>
+                                <line x1="51" y1="6" x2="51" y2="31" stroke="rgba(150,60,10,0.14)" stroke-width="1.5"/>
+                                <rect x="3" y="29" width="69" height="3" fill="rgba(0,0,0,0.09)"/>
+                                <g transform="translate(18,35)">
+                                    <circle r="8.5" fill="#8b9299"/>
+                                    <path d="M-8.5,0 A8.5,8.5 0 0,1 0,-8.5" stroke="rgba(255,255,255,0.13)" stroke-width="1.4" fill="none"/>
+                                    <circle r="5.8" fill="#b5bcc4"/>
+                                    <g class="hdr-car-wheel">
+                                        <circle r="3.2" fill="#d0d5da"/>
+                                        <line x1="-3.2" y1="0" x2="3.2" y2="0" stroke="rgba(255,255,255,0.35)" stroke-width="0.9"/>
+                                        <line x1="0" y1="-3.2" x2="0" y2="3.2" stroke="rgba(255,255,255,0.35)" stroke-width="0.9"/>
+                                        <line x1="-2.3" y1="-2.3" x2="2.3" y2="2.3" stroke="rgba(255,255,255,0.2)" stroke-width="0.7"/>
+                                        <line x1="2.3" y1="-2.3" x2="-2.3" y2="2.3" stroke="rgba(255,255,255,0.2)" stroke-width="0.7"/>
+                                    </g>
+                                    <circle r="1.4" fill="#9ca3af"/>
+                                </g>
+                                <g transform="translate(58,35)">
+                                    <circle r="8.5" fill="#8b9299"/>
+                                    <path d="M-8.5,0 A8.5,8.5 0 0,1 0,-8.5" stroke="rgba(255,255,255,0.13)" stroke-width="1.4" fill="none"/>
+                                    <circle r="5.8" fill="#b5bcc4"/>
+                                    <g class="hdr-car-wheel">
+                                        <circle r="3.2" fill="#d0d5da"/>
+                                        <line x1="-3.2" y1="0" x2="3.2" y2="0" stroke="rgba(255,255,255,0.35)" stroke-width="0.9"/>
+                                        <line x1="0" y1="-3.2" x2="0" y2="3.2" stroke="rgba(255,255,255,0.35)" stroke-width="0.9"/>
+                                        <line x1="-2.3" y1="-2.3" x2="2.3" y2="2.3" stroke="rgba(255,255,255,0.2)" stroke-width="0.7"/>
+                                        <line x1="2.3" y1="-2.3" x2="-2.3" y2="2.3" stroke="rgba(255,255,255,0.2)" stroke-width="0.7"/>
+                                    </g>
+                                    <circle r="1.4" fill="#9ca3af"/>
+                                </g>
+                                <path d="M8 31 Q18 25 28 31" fill="rgba(0,0,0,0.07)"/>
+                                <path d="M47 31 Q58 25 68 31" fill="rgba(0,0,0,0.07)"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="relative z-10">
+                    <h2 class="text-2xl font-bold text-on-surface flex items-center gap-2">
+                        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full border border-green-200 bg-green-50 shadow-sm text-green-700 text-lg md:text-1.5xl">
+                            <span class="material-symbols-outlined text-[16px]">space_dashboard</span>
+                            <span>Dashboard</span>
+                            <span>Overview</span>
+                        </span>
+                    </h2>
+                </div>
+
+                <div class="md:ml-auto relative z-10">
+                    <a href="notificationsdelivery.html" data-delivery-notif-bell class="relative inline-flex items-center justify-center w-10 h-10 rounded-full border border-green-200/80 bg-surface-container-lowest shadow-sm text-green-700 hover:bg-surface-container transition-colors active:scale-[0.98]" aria-label="Notifications">
+                        <span class="material-symbols-outlined text-[20px]">notifications</span>
+                        <span data-delivery-notif-bell-badge class="hidden absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-red-600 text-white text-[11px] font-extrabold leading-[18px] text-center shadow-md ring-2 ring-white">0</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Stats Bento Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8 border-t-2 border-primary rounded-xl pt-2">
+
+                <div class="stat-card bg-cyan-50/55 rounded-[18px] p-6 shadow-sm border border-cyan-100 relative overflow-hidden group">
+                    <div class="stat-orb absolute -right-5 -top-5 w-28 h-28 bg-cyan-200/50 rounded-full blur-2xl"></div>
+                    <div class="flex justify-between items-start mb-4 relative z-10">
+                        <div class="stat-icon p-3 bg-secondary-container/35 rounded-xl text-secondary">
+                            <span class="material-symbols-outlined fill">local_shipping</span>
+                        </div>
+                        <span class="stat-badge text-xs font-semibold text-primary bg-primary-fixed/35 px-2.5 py-1 rounded-full flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[12px]">trending_up</span> +12%
+                        </span>
+                    </div>
+                    <div class="relative z-10">
+                        <h3 class="text-on-surface-variant text-sm font-medium mb-1">Active Deliveries</h3>
+                        <p class="stat-value text-3xl font-bold font-headline" data-stat="active-deliveries">--</p>
+                        <p class="text-xs text-on-surface-variant mt-1">vs yesterday</p>
+                    </div>
+                </div>
+
+                <div class="stat-card bg-emerald-50/60 rounded-[18px] p-6 shadow-sm border border-emerald-100 relative overflow-hidden group">
+                    <div class="stat-orb absolute -right-5 -top-5 w-28 h-28 bg-emerald-200/50 rounded-full blur-2xl"></div>
+                    <div class="flex justify-between items-start mb-4 relative z-10">
+                        <div class="stat-icon p-3 bg-primary-container/10 rounded-xl text-primary">
+                            <span class="material-symbols-outlined fill">task_alt</span>
+                        </div>
+                        <span class="stat-badge text-xs font-semibold text-primary bg-primary-fixed/35 px-2.5 py-1 rounded-full flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[12px]">trending_up</span> +8%
+                        </span>
+                    </div>
+                    <div class="relative z-10">
+                        <h3 class="text-on-surface-variant text-sm font-medium mb-1">Completed Today</h3>
+                        <p class="stat-value text-3xl font-bold font-headline" data-stat="completed-today">--</p>
+                        <p class="text-xs text-on-surface-variant mt-1">vs yesterday</p>
+                    </div>
+                </div>
+
+                <div class="stat-card bg-rose-50/45 rounded-[18px] p-6 shadow-sm border border-rose-100 relative overflow-hidden group">
+                    <div class="stat-orb absolute -right-5 -top-5 w-28 h-28 bg-rose-200/45 rounded-full blur-2xl"></div>
+                    <div class="flex justify-between items-start mb-4 relative z-10">
+                        <div class="stat-icon p-3 bg-tertiary-container/10 rounded-xl text-tertiary">
+                            <span class="material-symbols-outlined fill">pending_actions</span>
+                        </div>
+                        <span class="stat-badge text-xs font-semibold text-error bg-error-container/60 px-2.5 py-1 rounded-full flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[12px]">trending_down</span> -3%
+                        </span>
+                    </div>
+                    <div class="relative z-10">
+                        <h3 class="text-on-surface-variant text-sm font-medium mb-1">Failed Deliveries</h3>
+                        <p class="stat-value text-3xl font-bold font-headline" data-stat="pending-orders">--</p>
+                        <p class="text-xs text-on-surface-variant mt-1">vs yesterday</p>
+                    </div>
+                </div>
+
+                <div class="stat-card bg-violet-50/50 rounded-[18px] p-6 shadow-sm border border-violet-100 relative overflow-hidden group">
+                    <div class="stat-orb absolute -right-5 -top-5 w-28 h-28 bg-violet-200/45 rounded-full blur-2xl"></div>
+                    <div class="flex justify-between items-start mb-4 relative z-10">
+                        <div class="stat-icon p-3 bg-secondary-container/35 rounded-xl text-secondary">
+                            <span class="material-symbols-outlined fill">bar_chart</span>
+                        </div>
+                        <span class="stat-badge text-xs font-semibold text-primary bg-primary-fixed/35 px-2.5 py-1 rounded-full flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[12px]">trending_up</span> +24%
+                        </span>
+                    </div>
+                    <div class="relative z-10">
+                        <h3 class="text-on-surface-variant text-sm font-medium mb-1">Total Weekly</h3>
+                        <p class="stat-value text-3xl font-bold font-headline" data-stat="total-weekly">--</p>
+                        <p class="text-xs text-on-surface-variant mt-1">vs last week</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Main Bento Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                <div class="lg:col-span-2 bg-surface-container-lowest rounded-[16px] shadow-sm pd-panel-elevated border border-surface-variant overflow-hidden">
+                    <div class="p-4 border-b border-surface-variant flex justify-between items-center bg-surface-bright">
+                        <h3 class="font-semibold text-on-surface font-headline flex items-center gap-2">
+                            <span class="material-symbols-outlined text-[20px] text-primary">inbox</span>
+                            Incoming Deliveries
+                        </h3>
+                        <button class="text-primary text-sm font-medium hover:underline flex items-center gap-1 active:scale-[0.98]">
+                            View All <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-surface-container-low text-on-surface-variant text-xs uppercase tracking-wider">
+                                    <th class="px-6 py-4 font-medium">Order ID</th>
+                                    <th class="px-6 py-4 font-medium">Farmer</th>
+                                    <th class="px-6 py-4 font-medium hidden sm:table-cell">Destination</th>
+                                    <th class="px-6 py-4 font-medium hidden md:table-cell">ETA</th>
+                                    <th class="px-6 py-4 font-medium text-right">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-sm divide-y divide-surface-variant">
+                                <tr><td colspan="5" class="px-6 py-8 text-center text-on-surface-variant text-sm">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-6">
+                    <div class="bg-surface-container-lowest rounded-[16px] shadow-sm pd-panel-elevated border border-surface-variant overflow-hidden flex-1">
+                        <div class="p-4 border-b border-surface-variant bg-surface-bright">
+                            <h3 class="font-semibold text-on-surface font-headline flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[20px] text-primary">directions_car</span>
+                                Fleet Status
+                            </h3>
+                        </div>
+                        <div class="p-5 flex flex-col gap-5">
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-sm text-on-surface font-medium">On Schedule</span>
+                                    <span class="text-sm font-bold text-primary">85%</span>
+                                </div>
+                                <div class="w-full h-2 bg-surface-variant rounded-full overflow-hidden">
+                                    <div class="h-full bg-primary rounded-full" style="width: 85%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex items-center justify-between mb-4">
+                                    <p class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Recent Alerts</p>
+                                    <a href="notificationsdelivery.html" class="text-primary text-xs font-semibold hover:underline flex items-center gap-1 active:scale-[0.98]">
+                                        View all <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+                                    </a>
+                                </div>
+                                <div class="flex flex-col gap-3" data-alerts-grid>
+                                    <p class="text-xs text-center text-on-surface-variant">Loading alerts...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script src="../api.js"></script>
+    <script src="./deliverydashboard.js"></script>
+
+    <script>
+        (function () {
+            var van  = document.getElementById('hdrVan');
+            var wrap = van && van.closest('.hdr-car-wrap');
+            if (!van || !wrap) return;
+
+            var x        = -90;
+            var speed    = 120;
+            var lastTime = null;
+
+            function loop(ts) {
+                if (lastTime === null) lastTime = ts;
+                var dt   = Math.min((ts - lastTime) / 1000, 0.05);
+                lastTime = ts;
+
+                x += speed * dt;
+
+                if (x > wrap.offsetWidth + 100) {
+                    x = -90;
+                }
+
+                van.style.transform = 'translateX(' + x + 'px)';
+                requestAnimationFrame(loop);
+            }
+
+            requestAnimationFrame(loop);
+        })();
+    </script>
+
+</body>
+</html>

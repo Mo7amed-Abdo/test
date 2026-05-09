@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Company Profile - PlantDoc</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-container": "#eceeef","surface-variant": "#e1e3e4","on-background": "#191c1d","background": "#f8fafb","primary": "#006a39","on-tertiary-fixed": "#40000f","outline-variant": "#bdcabc","on-error-container": "#93000a","surface-container-low": "#f2f4f5","secondary-container": "#c6e4f4","on-error": "#ffffff","on-primary-fixed": "#00210e","surface-container-lowest": "#ffffff","error": "#ba1a1a","tertiary-fixed": "#ffdadb","on-surface-variant": "#3e4a3f","primary-fixed-dim": "#64dd91","outline": "#6d7a6f","inverse-on-surface": "#eff1f2","secondary-fixed-dim": "#adcbda","inverse-surface": "#2e3132","surface-tint": "#006d3a","tertiary": "#a23546","on-secondary": "#ffffff","surface": "#f8fafb","secondary": "#466270","primary-fixed": "#82faab","tertiary-container": "#c24d5e","surface-dim": "#d8dadb","surface-container-highest": "#e1e3e4","on-tertiary-fixed-variant": "#851f33","on-secondary-container": "#4a6774","surface-bright": "#f8fafb","on-secondary-fixed": "#001e27","on-primary-container": "#f6fff4","primary-container": "#008649","on-tertiary-container": "#fffbff","on-tertiary": "#ffffff","inverse-primary": "#64dd91","error-container": "#ffdad6","on-primary": "#ffffff","secondary-fixed": "#c9e7f7","on-surface": "#191c1d","tertiary-fixed-dim": "#ffb2b8","on-primary-fixed-variant": "#00522b"
+                    },
+                    fontFamily: { "headline": ["Inter"], "body": ["Inter"], "label": ["Inter"] }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .material-symbols-outlined.fill { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        input, select, textarea {
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        /* Skeleton shimmer for professional loading states */
+        .pd-skel {
+            background: linear-gradient(90deg, rgba(236,238,239,0.95) 25%, rgba(226,228,229,0.95) 37%, rgba(236,238,239,0.95) 63%);
+            background-size: 400% 100%;
+            animation: pd-shimmer 1.25s ease infinite;
+        }
+        @keyframes pd-shimmer {
+            0% { background-position: 100% 0; }
+            100% { background-position: 0 0; }
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex font-body">
+
+    <!-- SideNavBar — Company -->
+    <nav class="bg-slate-50 text-green-600 font-inter text-sm font-medium fixed h-screen w-64 left-0 top-0 border-r border-slate-200 flex-col gap-2 hidden md:flex z-50">
+        <div class="flex items-center gap-1">
+            <div class="flex items-center"><img src="logo dark.png" alt="" class="w-26 h-28"></div>
+            <span class="text-lg font-bold text-green-700">PlantDoc</span>
+        </div>
+        <div class="flex-1 flex flex-col gap-1 px-4 pt-3">
+            <a class="text-slate-600 rounded-lg p-3 flex items-center gap-3 hover:bg-slate-200 transition-all active:scale-[0.98]" href="dashboardcompany.html">
+                <span class="material-symbols-outlined">dashboard</span><span>Dashboard</span>
+            </a>
+            <a class="text-slate-600 rounded-lg p-3 flex items-center gap-3 hover:bg-slate-200 transition-all active:scale-[0.98]" href="treatmentrequest.html">
+                <span class="material-symbols-outlined">medical_services</span><span>Treatment Requests</span>
+            </a>
+            <a class="text-slate-600 rounded-lg p-3 flex items-center gap-3 hover:bg-slate-200 transition-all active:scale-[0.98]" href="products.html">
+                <span class="material-symbols-outlined">inventory_2</span><span>Products</span>
+            </a>
+            <a class="text-slate-600 rounded-lg p-3 flex items-center gap-3 hover:bg-slate-200 transition-all active:scale-[0.98]" href="orders.html">
+                <span class="material-symbols-outlined">shopping_basket</span><span>Orders</span>
+            </a>
+            <!-- Profile (ACTIVE) -->
+            <a class="bg-green-700 text-white rounded-xl p-3 flex items-center gap-3 active:scale-[0.98] transition-transform" href="#">
+                <span class="material-symbols-outlined fill">person</span><span>Profile</span>
+            </a>
+        </div>
+        <!-- Profile card -->
+        <div class="mt-auto pt-4 border-t border-slate-200 px-4 pb-5">
+            <a class="rounded-xl px-3 py-2.5 flex items-center gap-3 bg-gradient-to-r from-green-100 to-emerald-50 border border-green-200 hover:from-green-200 hover:to-emerald-100 transition-all active:scale-[0.98] shadow-sm"
+                href="companyprofile.html">
+                <img src="" class="w-9 h-9 rounded-full object-cover border-2 border-white shadow-sm shrink-0" alt="Profile"
+                    data-user-avatar />
+                <div class="flex flex-col min-w-0">
+                    <span class="font-bold text-green-900 text-sm truncate" data-user-name>Loading...</span>
+                    <span class="text-xs text-green-700 truncate" data-user-role>Loading...</span>
+                </div>
+                <button class="ml-auto text-green-700 hover:text-green-900 transition-colors">
+                    <span class="material-symbols-outlined text-lg">logout</span>
+                </button>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col md:ml-64 w-full">
+
+        <!-- Mobile Header -->
+        <header class="md:hidden sticky top-0 z-40 flex h-16 w-full items-center justify-between px-4 bg-gray-50 border-b border-slate-200 shadow-sm">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined fill text-primary text-2xl">spa</span>
+                <h1 class="text-xl font-bold text-green-700">PlantDoc</h1>
+            </div>
+            <div class="flex items-center gap-2">
+                <button aria-label="Notifications" class="p-2 text-slate-500 hover:text-green-600 transition-colors active:scale-95 rounded-full">
+                    <span class="material-symbols-outlined">notifications</span>
+                </button>
+                <button aria-label="Account" class="p-2 text-green-600 transition-colors active:scale-95 rounded-full">
+                    <span class="material-symbols-outlined fill">account_circle</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="p-6 md:p-8 flex-1 overflow-y-auto">
+
+            <!-- Page heading -->
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-on-surface">
+                    <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-green-200/80 bg-gradient-to-r from-green-50 via-emerald-50 to-green-100 shadow-sm text-green-700">
+                        <span class="material-symbols-outlined text-[18px]">apartment</span>
+                        <span>Company Profile</span>
+                    </span>
+                </h2>
+                <p class="text-sm text-on-surface-variant mt-1">Manage your business information and account settings</p>
+            </div>
+
+            <!-- Error / retry (shown only when profile fetch fails) -->
+            <div class="hidden mb-6" data-profile-error>
+                <div class="bg-error-container text-on-error-container border border-error/20 rounded-2xl p-5 flex items-start gap-3">
+                    <span class="material-symbols-outlined text-[20px] text-error shrink-0">error</span>
+                    <div class="flex-1">
+                        <p class="font-semibold">We couldn't load your profile.</p>
+                        <p class="text-sm opacity-80 mt-0.5">Check your connection and try again.</p>
+                    </div>
+                    <button type="button" data-profile-retry
+                            class="px-4 py-2 rounded-xl bg-surface-container-lowest text-on-surface text-sm font-semibold border border-outline-variant hover:bg-surface-container transition-colors active:scale-[0.98]">
+                        Retry
+                    </button>
+                </div>
+            </div>
+
+            <!-- 3-col layout -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 border-t-2 pt-2 border-primary rounded-xl">
+
+                <!-- Left col: summary card + quick links -->
+                <div class="lg:col-span-1 space-y-5">
+
+                    <!-- Profile Summary -->
+                    <div class="bg-surface-container-lowest rounded-[18px] shadow-sm border border-surface-variant overflow-hidden">
+                        <div class="h-20 bg-gradient-to-r from-primary-fixed/40 via-surface-container-lowest to-secondary-fixed/30 border-b border-surface-variant"></div>
+                        <div class="p-6 pt-0 -mt-10 flex flex-col items-center text-center">
+                        <div class="w-24 h-24 rounded-full overflow-hidden border-[3px] border-surface-container-lowest shadow-md mb-4 bg-surface-container cursor-pointer relative group"
+                             id="logo-upload-trigger" role="button" tabindex="0" aria-label="Change company logo">
+                            <img data-profile-logo src="" alt="Company Logo" class="w-full h-full object-cover" />
+                            <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <span class="material-symbols-outlined text-white text-xl">photo_camera</span>
+                            </div>
+                            <div class="absolute -bottom-1 -right-1 w-9 h-9 rounded-full bg-primary text-on-primary shadow-md border-2 border-surface-container-lowest flex items-center justify-center pointer-events-none">
+                                <span class="material-symbols-outlined text-[18px]">edit</span>
+                            </div>
+                        </div>
+                        <div class="h-5 w-40 mx-auto rounded-lg pd-skel" data-skel-name></div>
+                        <h3 class="hidden font-extrabold text-lg text-on-surface font-headline mt-1" data-profile-name></h3>
+                        <div class="h-4 w-56 mx-auto rounded-lg pd-skel mt-2" data-skel-email></div>
+                        <p class="text-sm text-on-surface-variant mt-1 mb-4" data-profile-email>—</p>
+                        <div class="mt-4 flex flex-wrap items-center justify-center gap-2">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-surface-container text-on-surface-variant border border-outline-variant">
+                                <span class="material-symbols-outlined text-[14px] text-primary">apartment</span>
+                                Company
+                            </span>
+                            <span id="verified-badge" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-primary-fixed text-on-primary-fixed-variant border border-primary-fixed-dim/40">
+                                <span class="material-symbols-outlined fill text-[14px]">verified</span>
+                                Verified
+                            </span>
+                        </div>
+
+                        <div class="mt-4 w-full grid grid-cols-1 gap-2">
+                            <div class="flex items-center justify-center gap-2 text-xs text-on-surface-variant">
+                                <span class="material-symbols-outlined text-[16px]">location_on</span>
+                                <span data-profile-location class="truncate max-w-[22ch]">Not set</span>
+                            </div>
+                            <div class="flex items-center justify-center gap-2 text-xs text-on-surface-variant">
+                                <span class="material-symbols-outlined text-[16px]">calendar_today</span>
+                                <span data-profile-joined>Joined</span>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Links -->
+                    <div class="bg-surface-container-lowest rounded-[16px] shadow-sm border border-surface-variant p-4">
+                        <p class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-3 px-2">Quick Links</p>
+                        <nav class="flex flex-col gap-1">
+                            <a href="#company-details" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg bg-surface-container text-on-surface transition-colors">
+                                <span class="material-symbols-outlined text-[18px] text-primary">store</span>Company Details
+                            </a>
+                            <a href="#security" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors">
+                                <span class="material-symbols-outlined text-[18px]">lock</span>Security & Password
+                            </a>
+                        </nav>
+                    </div>
+                </div>
+
+                <!-- Right col: forms -->
+                <div class="lg:col-span-2 space-y-6">
+
+                    <!-- Company Details Form -->
+                    <div id="company-details" class="bg-surface-container-lowest rounded-[16px] shadow-sm border border-surface-variant overflow-hidden">
+                        <div class="p-6 border-b border-surface-variant bg-surface-bright">
+                            <h3 class="text-base font-bold text-on-surface font-headline flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[20px] text-primary">edit_document</span>Company Details
+                            </h3>
+                            <p class="text-sm text-on-surface-variant mt-1">Update your public-facing business information.</p>
+                        </div>
+                        <form id="company-details-form" class="p-6 space-y-5">
+                            <!-- Company Name -->
+                            <div>
+                                <label class="block text-sm font-medium text-on-surface mb-1.5" for="company-name">Company Name</label>
+                                <div data-field-wrap="company-name" class="flex rounded-lg overflow-hidden border border-outline-variant focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-sm">
+                                    <span class="inline-flex items-center px-3 bg-surface-container-low border-r border-outline-variant text-on-surface-variant shrink-0"><span class="material-symbols-outlined text-[18px]">business</span></span>
+                                    <input type="text" id="company-name" name="companyName" placeholder="Your company name" class="flex-1 px-3 py-2.5 text-sm bg-surface-container-lowest text-on-surface border-none focus:outline-none focus:ring-0" />
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                <!-- Contact Number -->
+                                <div>
+                                    <label class="block text-sm font-medium text-on-surface mb-1.5" for="contact-number">Contact Number</label>
+                                    <div data-field-wrap="contact-number" class="flex rounded-lg overflow-hidden border border-outline-variant focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-sm">
+                                        <span class="inline-flex items-center px-3 bg-surface-container-low border-r border-outline-variant text-on-surface-variant shrink-0"><span class="material-symbols-outlined text-[18px]">phone</span></span>
+                                        <input type="tel" id="contact-number" name="contactNumber" placeholder="+1 (555) 000-0000" class="flex-1 px-3 py-2.5 text-sm bg-surface-container-lowest text-on-surface border-none focus:outline-none focus:ring-0" />
+                                    </div>
+                                </div>
+                                <!-- Support Email -->
+                                <div>
+                                    <label class="block text-sm font-medium text-on-surface mb-1.5" for="email">Support Email</label>
+                                    <div data-field-wrap="email" class="flex rounded-lg overflow-hidden border border-outline-variant focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-sm">
+                                        <span class="inline-flex items-center px-3 bg-surface-container-low border-r border-outline-variant text-on-surface-variant shrink-0"><span class="material-symbols-outlined text-[18px]">mail</span></span>
+                                        <input type="email" id="email" name="email" placeholder="support@yourcompany.com" class="flex-1 px-3 py-2.5 text-sm bg-surface-container-lowest text-on-surface border-none focus:outline-none focus:ring-0" />
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Street Address -->
+                            <div>
+                                <label class="block text-sm font-medium text-on-surface mb-1.5" for="street-address">Street Address</label>
+                                <div data-field-wrap="street-address" class="flex rounded-lg overflow-hidden border border-outline-variant focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-sm">
+                                    <span class="inline-flex items-center px-3 bg-surface-container-low border-r border-outline-variant text-on-surface-variant shrink-0"><span class="material-symbols-outlined text-[18px]">location_on</span></span>
+                                    <input type="text" id="street-address" name="address" placeholder="123 Commerce Street" class="flex-1 px-3 py-2.5 text-sm bg-surface-container-lowest text-on-surface border-none focus:outline-none focus:ring-0" />
+                                </div>
+                            </div>
+                            <!-- Description -->
+                            <div>
+                                <label class="block text-sm font-medium text-on-surface mb-1.5" for="description">Company Description</label>
+                                <textarea id="description" name="description" rows="3" placeholder="Tell farmers about your products and services…" class="w-full px-3 py-2.5 text-sm border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none transition-all shadow-sm"></textarea>
+                            </div>
+                            <div class="pt-2 flex justify-end gap-3">
+                                <button id="discard-btn" type="button" class="px-5 py-2.5 bg-surface-container-lowest border border-outline-variant text-on-surface rounded-lg text-sm font-medium hover:bg-surface-container transition-colors active:scale-[0.98]">
+                                    Discard
+                                </button>
+                                <button type="submit" class="flex items-center gap-2 px-5 py-2.5 bg-primary text-on-primary rounded-lg text-sm font-semibold hover:translate-y-[-1px] hover:shadow-md transition-all duration-200 border border-primary hover:bg-white hover:text-primary active:scale-[0.98]">
+                                    <span class="material-symbols-outlined text-[18px]">save</span>Save Details
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Security / Password -->
+                    <div id="security" class="bg-surface-container-lowest rounded-[16px] shadow-sm border border-surface-variant overflow-hidden">
+                        <div class="p-6 border-b border-surface-variant bg-surface-bright">
+                            <h3 class="text-base font-bold text-on-surface font-headline flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[20px] text-primary">lock</span>Security & Password
+                            </h3>
+                            <p class="text-sm text-on-surface-variant mt-1">Update your account password.</p>
+                        </div>
+                        <form id="password-form" class="p-6 space-y-5">
+                            <div>
+                                <label class="block text-sm font-medium text-on-surface mb-1.5" for="currentPassword">Current Password</label>
+                                <div class="flex rounded-lg overflow-hidden border border-outline-variant focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-sm">
+                                    <span class="inline-flex items-center px-3 bg-surface-container-low border-r border-outline-variant text-on-surface-variant shrink-0"><span class="material-symbols-outlined text-[18px]">lock</span></span>
+                                    <input type="password" id="currentPassword" placeholder="••••••••" class="flex-1 px-3 py-2.5 text-sm bg-surface-container-lowest text-on-surface border-none focus:outline-none focus:ring-0" />
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                <div>
+                                    <label class="block text-sm font-medium text-on-surface mb-1.5" for="newPassword">New Password</label>
+                                    <div class="flex rounded-lg overflow-hidden border border-outline-variant focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-sm">
+                                        <span class="inline-flex items-center px-3 bg-surface-container-low border-r border-outline-variant text-on-surface-variant shrink-0"><span class="material-symbols-outlined text-[18px]">key</span></span>
+                                        <input type="password" id="newPassword" placeholder="••••••••" class="flex-1 px-3 py-2.5 text-sm bg-surface-container-lowest text-on-surface border-none focus:outline-none focus:ring-0" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-on-surface mb-1.5" for="confirmPassword">Confirm New Password</label>
+                                    <div class="flex rounded-lg overflow-hidden border border-outline-variant focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-sm">
+                                        <span class="inline-flex items-center px-3 bg-surface-container-low border-r border-outline-variant text-on-surface-variant shrink-0"><span class="material-symbols-outlined text-[18px]">key</span></span>
+                                        <input type="password" id="confirmPassword" placeholder="••••••••" class="flex-1 px-3 py-2.5 text-sm bg-surface-container-lowest text-on-surface border-none focus:outline-none focus:ring-0" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="pt-2 flex justify-end">
+                                <button type="submit" class="flex items-center gap-2 px-5 py-2.5 bg-primary text-on-primary rounded-lg text-sm font-semibold hover:translate-y-[-1px] hover:shadow-md transition-all duration-200 border border-primary hover:bg-white hover:text-primary active:scale-[0.98]">
+                                    <span class="material-symbols-outlined text-[18px]">lock_reset</span>Update Password
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../api.js"></script>
+    <script src="./companyprofile.js"></script>
+</body>
+</html>

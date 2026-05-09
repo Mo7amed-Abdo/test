@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>My Orders - PlantDoc</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-container": "#eceeef", "surface-variant": "#e1e3e4", "on-background": "#191c1d",
+                        "background": "#f0f4f2", "primary": "#006a39", "outline-variant": "#bdcabc",
+                        "surface-container-low": "#f2f4f5", "on-error": "#ffffff",
+                        "surface-container-lowest": "#ffffff", "error": "#ba1a1a",
+                        "on-surface-variant": "#3e4a3f", "outline": "#6d7a6f",
+                        "inverse-on-surface": "#eff1f2", "inverse-surface": "#2e3132",
+                        "on-secondary": "#ffffff", "surface": "#f8fafb",
+                        "secondary": "#466270", "surface-dim": "#d8dadb",
+                        "surface-container-highest": "#e1e3e4",
+                        "surface-container-high": "#e6e8e9", "error-container": "#ffdad6",
+                        "on-primary": "#ffffff", "on-surface": "#191c1d",
+                        "primary-container": "#008649", "on-tertiary": "#ffffff",
+                    },
+                    fontFamily: { "headline": ["Inter"], "body": ["Inter"] }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #f0f4f2; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; user-select: none; }
+        .material-symbols-outlined.fill { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+
+        /* ── Card enter animation ── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .order-card {
+            animation: fadeUp 0.4s ease both;
+            transition: box-shadow 0.2s ease, transform 0.2s ease;
+        }
+        .order-card:hover {
+            box-shadow: 0 8px 32px -6px rgba(0,106,57,0.14);
+            transform: translateY(-2px);
+        }
+        .order-card:nth-child(1) { animation-delay: 0.05s; }
+        .order-card:nth-child(2) { animation-delay: 0.1s;  }
+        .order-card:nth-child(3) { animation-delay: 0.15s; }
+        .order-card:nth-child(4) { animation-delay: 0.2s;  }
+        .order-card:nth-child(5) { animation-delay: 0.25s; }
+
+        /* ── Items expand/collapse ── */
+        .order-items-panel {
+            max-height: 0; overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1);
+        }
+        .order-items-panel.open { max-height: 900px; }
+        .chevron { transition: transform 0.25s ease; display: inline-block; }
+        .chevron.open { transform: rotate(180deg); }
+
+        /* ── Skeleton ── */
+        @keyframes shimmer {
+            0%   { background-position: -600px 0; }
+            100% { background-position:  600px 0; }
+        }
+        .skeleton {
+            background: linear-gradient(90deg, #e8ece9 25%, #d8dfd9 50%, #e8ece9 75%);
+            background-size: 600px 100%;
+            animation: shimmer 1.4s ease-in-out infinite;
+            border-radius: 6px;
+        }
+
+        /* ── Status badges ── */
+        .badge-pending    { background:#fef9ec; color:#b45309; border:1px solid #fcd34d; }
+        .badge-processing { background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; }
+        .badge-shipped    { background:#f5f3ff; color:#6d28d9; border:1px solid #ddd6fe; }
+        .badge-on_the_way { background:#eef2ff; color:#4338ca; border:1px solid #c7d2fe; }
+        .badge-arriving   { background:#fff7ed; color:#c2410c; border:1px solid #fed7aa; }
+        .badge-delivered  { background:#f0fdf4; color:#15803d; border:1px solid #bbf7d0; }
+        .badge-cancelled  { background:#fff1f2; color:#be123c; border:1px solid #fecdd3; }
+
+        /* ── Status card accent (left border) ── */
+        .accent-pending    { border-left: 3px solid #f59e0b; }
+        .accent-processing { border-left: 3px solid #3b82f6; }
+        .accent-shipped    { border-left: 3px solid #8b5cf6; }
+        .accent-on_the_way { border-left: 3px solid #6366f1; }
+        .accent-arriving   { border-left: 3px solid #f97316; }
+        .accent-delivered  { border-left: 3px solid #22c55e; }
+        .accent-cancelled  { border-left: 3px solid #f43f5e; }
+
+        /* ── Tabs ── */
+        .tab-btn {
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .tab-btn.active {
+            background: #006a39;
+            color: #fff;
+            border-color: #006a39;
+            box-shadow: 0 2px 8px rgba(0,106,57,0.25);
+        }
+
+        /* ── Progress steps ── */
+        .step-done  { background:#006a39; border-color:#006a39; }
+        .step-current{ background:#fff; border-color:#006a39; box-shadow:0 0 0 3px rgba(0,106,57,0.18); }
+        .step-todo  { background:#fff; border-color:#bdcabc; }
+        .step-line-done { background:#006a39; }
+        .step-line-todo { background:#e1e3e4; }
+
+        /* ── Scrollbar for tabs ── */
+        #status-tabs::-webkit-scrollbar { height: 0; }
+
+        /* ── Order Detail Modal ── */
+        #order-modal {
+            transition: opacity 0.25s ease;
+        }
+        #order-modal.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        #order-modal:not(.hidden) {
+            opacity: 1;
+        }
+        #order-modal-panel {
+            transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.34, 1.3, 0.64, 1);
+        }
+        #order-modal.hidden #order-modal-panel {
+            opacity: 0;
+            transform: scale(0.93) translateY(16px);
+        }
+        #order-modal:not(.hidden) #order-modal-panel {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+        /* Scrollbar inside modal */
+        #order-modal-body::-webkit-scrollbar { width: 4px; }
+        #order-modal-body::-webkit-scrollbar-track { background: transparent; }
+        #order-modal-body::-webkit-scrollbar-thumb { background: #bdcabc; border-radius: 9999px; }
+
+        /* Modal backdrop + panel polish */
+        .modal-overlay {
+            background: radial-gradient(1100px circle at 20% 10%, rgba(0,106,57,0.14), transparent 48%),
+                        radial-gradient(900px circle at 90% 80%, rgba(0,134,73,0.10), transparent 55%),
+                        rgba(15, 23, 42, 0.38);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+        #order-modal-panel {
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            box-shadow: 0 30px 90px rgba(2, 6, 23, 0.28);
+        }
+
+        /* Rating stars */
+        .rate-star {
+            transition: transform 200ms ease-in-out, color 200ms ease-in-out, background 200ms ease-in-out;
+        }
+        .rate-star:hover { transform: translateY(-1px) scale(1.05); }
+        .rate-star.is-on { color: #0F9D58; }
+    </style>
+</head>
+
+<body class="text-on-background min-h-screen flex font-body">
+
+    <!-- ══════════════════ Sidebar ══════════════════ -->
+    <nav class="bg-slate-50 text-sm font-medium fixed h-screen w-64 left-0 top-0 border-r border-slate-200 flex-col gap-2 hidden md:flex z-50">
+        <div class="flex items-center gap-1">
+            <img src="logo dark.png" alt="" class="w-26 h-28">
+            <span class="text-lg font-bold text-green-700">PlantDoc</span>
+        </div>
+        <div class="flex-1 flex flex-col gap-1 px-4">
+            <a class="text-slate-600 rounded-xl px-4 py-3 flex items-center gap-3 hover:bg-slate-100 hover:text-green-700 transition-all active:scale-[0.98]" href="farmerdashboard.html">
+                <span class="material-symbols-outlined">dashboard</span><span>Dashboard</span>
+            </a>
+            <a class="text-slate-600 rounded-xl px-4 py-3 flex items-center gap-3 hover:bg-slate-100 hover:text-green-700 transition-all active:scale-[0.98]" href="recendiagnoses.html">
+                <span class="material-symbols-outlined">biotech</span><span>Diagnoses</span>
+            </a>
+            <a class="text-slate-600 rounded-xl px-4 py-3 flex items-center gap-3 hover:bg-slate-100 hover:text-green-700 transition-all active:scale-[0.98]" href="treatmentsolutions.html">
+                <span class="material-symbols-outlined">medication</span><span>Treatments</span>
+            </a>
+            <a class="bg-green-700 text-white rounded-xl px-4 py-3 flex items-center gap-3 active:scale-[0.98] transition-transform" href="#">
+                <span class="material-symbols-outlined fill">shopping_basket</span><span>Orders</span>
+            </a>
+            <a class="text-slate-600 rounded-xl px-4 py-3 flex items-center gap-3 hover:bg-slate-100 hover:text-green-700 transition-all active:scale-[0.98]" href="expertschat.html">
+                <span class="material-symbols-outlined">forum</span><span>Chat with Expert</span>
+            </a>
+            <a class="text-slate-600 rounded-xl px-4 py-3 flex items-center gap-3 hover:bg-slate-100 hover:text-green-700 transition-all active:scale-[0.98]" href="farmernotifications.html">
+                <span class="material-symbols-outlined">notifications</span><span>Notifications</span>
+            </a>
+        </div>
+        <div class="mt-auto pt-4 border-t border-slate-200 px-4 pb-5">
+            <a class="rounded-xl px-3 py-2.5 flex items-center gap-3 bg-gradient-to-r from-green-100 to-emerald-50 border border-green-200 hover:from-green-200 hover:to-emerald-100 transition-all active:scale-[0.98] shadow-sm" href="farmerprofile.html">
+                <img src="" class="w-9 h-9 rounded-full object-cover border-2 border-white shadow-sm shrink-0" alt="Profile" data-user-avatar />
+                <div class="flex flex-col min-w-0">
+                    <span class="font-bold text-green-900 text-sm truncate" data-user-name>Loading...</span>
+                    <span class="text-xs text-green-700 truncate" data-user-role>Loading...</span>
+                </div>
+                <button class="ml-auto text-green-700 hover:text-green-900 transition-colors">
+                    <span class="material-symbols-outlined text-lg">logout</span>
+                </button>
+            </a>
+        </div>
+    </nav>
+
+    <!-- ══════════════════ Mobile Header ══════════════════ -->
+    <header class="md:hidden sticky top-0 z-40 flex h-14 w-full items-center justify-between px-4 bg-white border-b border-slate-100 shadow-sm">
+        <a href="treatmentsolutions.html" class="p-1.5 text-slate-500 hover:text-green-700 hover:bg-green-50 rounded-full transition-all">
+            <span class="material-symbols-outlined">arrow_back</span>
+        </a>
+        <span class="text-sm font-bold text-on-surface">My Orders</span>
+        <div class="w-9"></div>
+    </header>
+
+    <!-- ══════════════════ Main ══════════════════ -->
+    <main class="flex-1 md:ml-64 w-full">
+
+        <!-- Page Header -->
+        <div class="bg-slate-100 px-6 md:px-10 pt-6 md:py-8">
+            <div class="mx-auto flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-on-surface font-headline">
+                        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-green-200/80 bg-gradient-to-r from-green-50 via-emerald-50 to-green-100 shadow-sm text-green-700">
+                            <span class="material-symbols-outlined text-[18px]">shopping_basket</span>
+                            <span>My Orders</span>
+                        </span>
+                    </h1>
+                </div>
+                <a href="treatmentsolutions.html"
+                   class="self-start sm:self-auto flex items-center gap-2 px-4 py-2 bg-primary text-on-primary rounded-lg text-sm font-semibold hover:bg-primary/90 transition-all shadow-sm active:scale-[0.98] whitespace-nowrap">
+                    <span class="material-symbols-outlined text-[18px]">add_shopping_cart</span> Shop More
+                </a>
+            </div>
+        </div>
+
+        <div class="px-4 md:px-10 pb-7 flex flex-col gap-6 mx-auto w-full">
+
+            <!-- Status Filter Tabs -->
+            <div class="overflow-x-auto -mx-1 px-1 border-t-2 border-primary pt-2 rounded-xl">
+                <div class="flex gap-2 w-max min-w-full" id="status-tabs">
+                    <button class="tab-btn active px-4 py-1.5 rounded-full text-sm font-semibold border border-transparent transition-all" data-status="all">All Orders</button>
+                    <button class="tab-btn px-4 py-1.5 rounded-full text-sm font-medium border border-slate-200 bg-white text-slate-600 hover:border-amber-300 hover:text-amber-700 transition-all" data-status="pending">⏳ Pending</button>
+                    <button class="tab-btn px-4 py-1.5 rounded-full text-sm font-medium border border-slate-200 bg-white text-slate-600 hover:border-blue-300 hover:text-blue-700 transition-all" data-status="processing">⚙️ Processing</button>
+                    <button class="tab-btn px-4 py-1.5 rounded-full text-sm font-medium border border-slate-200 bg-white text-slate-600 hover:border-purple-300 hover:text-purple-700 transition-all" data-status="shipped">📦 Shipped</button>
+                    <button class="tab-btn px-4 py-1.5 rounded-full text-sm font-medium border border-slate-200 bg-white text-slate-600 hover:border-green-300 hover:text-green-700 transition-all" data-status="delivered">✅ Delivered</button>
+                    <button class="tab-btn px-4 py-1.5 rounded-full text-sm font-medium border border-slate-200 bg-white text-slate-600 hover:border-red-300 hover:text-red-700 transition-all" data-status="cancelled">✖ Cancelled</button>
+                </div>
+            </div>
+
+            <!-- Orders List -->
+            <div id="orders-list" class="flex flex-col gap-4"></div>
+
+        </div>
+    </main>
+
+    <script src="../api.js"></script>
+    <script>
+        /* ──────────────────────────────────────────
+           Boot  — LOGIC UNCHANGED
+        ────────────────────────────────────────── */
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!requireAuth('farmer')) return;
+            populateSidebarUser();
+            setupLogout();
+            await loadOrders();
+            setupTabs();
+            setupDeliveryRateModal();
+
+            // ── Card click → modal (delegated so it works after every renderOrders call) ──
+            document.getElementById('orders-list').addEventListener('click', e => {
+                // Don't intercept the "View items" toggle button
+                if (e.target.closest('[data-toggle-items]')) return;
+                const card = e.target.closest('.order-card');
+                if (!card) return;
+                const orderId = card.dataset.orderId;
+                const order   = allOrders.find(o => String(o._id || o.id || '') === orderId);
+                if (order) openOrderModal(order);
+            });
+        });
+
+        /* ──────────────────────────────────────────
+           State  — LOGIC UNCHANGED
+        ────────────────────────────────────────── */
+        let allOrders = [];
+        let activeTab = 'all';
+
+        /* ──────────────────────────────────────────
+           loadOrders  — LOGIC UNCHANGED
+        ────────────────────────────────────────── */
+        async function loadOrders() {
+            const list = document.getElementById('orders-list');
+            list.innerHTML = skeletonOrders(3);
+            try {
+                const res = await api.get('/orders');
+                allOrders = res.data || [];
+                renderOrders(allOrders);
+            } catch (e) {
+                list.innerHTML = errorState(e.message);
+            }
+        }
+
+        /* ──────────────────────────────────────────
+           renderOrders  — LOGIC UNCHANGED
+        ────────────────────────────────────────── */
+        function renderOrders(orders) {
+            const list = document.getElementById('orders-list');
+            const filtered = activeTab === 'all'
+                ? orders
+                : orders.filter(o => o.status === activeTab);
+
+            if (!filtered.length) { list.innerHTML = emptyState(activeTab); return; }
+
+            list.innerHTML = filtered.map(order => orderCard(order)).join('');
+
+            list.querySelectorAll('[data-toggle-items]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id      = btn.dataset.toggleItems;
+                    const panel   = document.getElementById(`items-${id}`);
+                    const chevron = btn.querySelector('.chevron');
+                    const isOpen  = panel.classList.toggle('open');
+                    chevron.classList.toggle('open', isOpen);
+                    btn.querySelector('[data-toggle-label]').textContent =
+                        isOpen ? 'Hide items' : 'View items';
+                });
+            });
+
+            // Hydrate delivery ratings (delivered orders only)
+            hydrateDeliveryRatings(filtered).catch(() => null);
+        }
+
+        async function hydrateDeliveryRatings(orders) {
+            if (!Array.isArray(orders) || !orders.length) return;
+            // Only run when the tab could show delivered orders
+            if (!(activeTab === 'all' || activeTab === 'delivered')) return;
+
+            const delivered = orders.filter(o => (o.status || '') === 'delivered');
+            if (!delivered.length) return;
+
+            await Promise.allSettled(delivered.map(async (o) => {
+                const id = o._id || o.id;
+                if (!id) return;
+                const slot = document.getElementById(`delivery-rating-${id}`);
+                if (!slot || slot.dataset.loaded === '1') return;
+
+                try {
+                    const res = await api.get(`/orders/${id}/ratings`);
+                    const ratings = res.data || [];
+                    const r = ratings.find(x => x.target_type === 'delivery_company');
+                    if (!r) { slot.dataset.loaded = '1'; return; }
+                    slot.dataset.loaded = '1';
+                    slot.classList.remove('hidden');
+                    slot.innerHTML = deliveryRatingViewHTML(r);
+                } catch (_) {
+                    // ignore
+                }
+            }));
+        }
+
+        function deliveryRatingViewHTML(r) {
+            const stars = Number(r.stars || 0);
+            const review = (r.review || '').trim();
+            return `
+              <div class="mt-4 mx-6 mb-0 rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
+                <div class="flex items-center justify-between gap-3">
+                  <p class="text-xs font-extrabold text-slate-400 uppercase tracking-widest">Delivery Rating</p>
+                  <div class="flex items-center gap-0.5">
+                    ${Array.from({length:5}).map((_,i)=>`<span class="material-symbols-outlined text-[18px] ${i < stars ? 'text-[#0F9D58]' : 'text-slate-200'}">star</span>`).join('')}
+                  </div>
+                </div>
+                ${review ? `<p class="mt-2 text-sm text-slate-700 italic leading-relaxed">"${escapeHtml(review)}"</p>` : ''}
+              </div>`;
+        }
+
+        function renderStars(container, stars) {
+            if (!container) return;
+            const s = Math.max(0, Math.min(5, Number(stars || 0)));
+            container.innerHTML = Array.from({ length: 5 }).map((_, i) =>
+                `<span class="material-symbols-outlined text-[18px] ${i < s ? 'text-[#0F9D58]' : 'text-slate-200'}">star</span>`
+            ).join('');
+        }
+
+        let _deliveryRateState = { orderId: null, deliveryCompanyId: null, stars: 0 };
+
+        function setupDeliveryRateModal() {
+            const modal = document.getElementById('delivery-rate-modal');
+            const starsWrap = document.getElementById('delivery-rate-stars');
+            const submitBtn = document.getElementById('delivery-rate-submit');
+            if (!modal || !starsWrap || !submitBtn) return;
+            if (modal.dataset.bound === '1') return;
+            modal.dataset.bound = '1';
+
+            starsWrap.addEventListener('click', (e) => {
+                const btn = e.target.closest('[data-rate-star]');
+                if (!btn) return;
+                const v = Number(btn.dataset.rateStar || 0);
+                _deliveryRateState.stars = v;
+                updateDeliveryRateStarsUI();
+            });
+
+            submitBtn.addEventListener('click', async () => {
+                const { orderId, deliveryCompanyId, stars } = _deliveryRateState;
+                if (!orderId || !deliveryCompanyId) return;
+                if (!stars) { showToast('Select a star rating', 'error'); return; }
+
+                const review = (document.getElementById('delivery-rate-review')?.value || '').trim();
+                submitBtn.disabled = true;
+                const prevText = submitBtn.textContent;
+                submitBtn.textContent = 'Submitting...';
+                try {
+                    const res = await api.post(`/orders/${orderId}/ratings`, {
+                        target_type: 'delivery_company',
+                        target_id: deliveryCompanyId,
+                        stars,
+                        review: review || null,
+                    });
+                    const rating = res.data || null;
+                    showToast('Delivery rating submitted!', 'success');
+                    closeDeliveryRateModal();
+                    if (rating) applyDeliveryRatingToUI(orderId, rating);
+                } catch (err) {
+                    showToast(err?.message || 'Failed to submit rating', 'error');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = prevText;
+                }
+            });
+        }
+
+        function updateDeliveryRateStarsUI() {
+            const starsWrap = document.getElementById('delivery-rate-stars');
+            const hint = document.getElementById('delivery-rate-hint');
+            if (!starsWrap) return;
+            const v = Number(_deliveryRateState.stars || 0);
+            starsWrap.querySelectorAll('[data-rate-star]').forEach((btn) => {
+                const n = Number(btn.dataset.rateStar || 0);
+                btn.classList.toggle('is-on', n <= v);
+            });
+            if (hint) hint.textContent = v ? `${v}/5` : 'Tap a star to rate';
+        }
+
+        function openDeliveryRateModal(orderId, deliveryCompanyId) {
+            _deliveryRateState = { orderId, deliveryCompanyId, stars: 0 };
+            const modal = document.getElementById('delivery-rate-modal');
+            const review = document.getElementById('delivery-rate-review');
+            if (review) review.value = '';
+            updateDeliveryRateStarsUI();
+            if (modal) {
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeDeliveryRateModal() {
+            const modal = document.getElementById('delivery-rate-modal');
+            if (modal) modal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        function applyDeliveryRatingToUI(orderId, rating) {
+            // Update card slot (delivered list)
+            const slot = document.getElementById(`delivery-rating-${orderId}`);
+            if (slot) {
+                slot.dataset.loaded = '1';
+                slot.classList.remove('hidden');
+                slot.innerHTML = deliveryRatingViewHTML(rating);
+            }
+
+            // Update current order modal if it's open for the same order
+            const orderModal = document.getElementById('order-modal');
+            if (orderModal?.dataset?.orderId === String(orderId)) {
+                const ratingView = document.getElementById('modal-delivery-rating-view');
+                const ratingStars = document.getElementById('modal-delivery-rating-stars');
+                const ratingReview = document.getElementById('modal-delivery-rating-review');
+                const rateWrap = document.getElementById('modal-rate-wrap');
+
+                if (rateWrap) rateWrap.classList.add('hidden');
+                if (ratingView) ratingView.classList.remove('hidden');
+                renderStars(ratingStars, Number(rating.stars || 0));
+                const rv = (rating.review || '').trim();
+                if (ratingReview) {
+                    if (rv) {
+                        ratingReview.classList.remove('hidden');
+                        ratingReview.textContent = `"${rv}"`;
+                    } else {
+                        ratingReview.classList.add('hidden');
+                        ratingReview.textContent = '';
+                    }
+                }
+            }
+        }
+
+        /* ──────────────────────────────────────────
+           orderCard  — UI REDESIGNED, logic identical
+        ────────────────────────────────────────── */
+        function orderCard(order) {
+            const items     = order.items || [];
+            const date      = order.placed_at
+                ? new Date(order.placed_at).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' })
+                : '—';
+            const id        = order._id || order.id || '';
+            const code      = order.order_code || ('#' + String(id).slice(-6).toUpperCase());
+            const status    = order.status || 'pending';
+            const total     = parseFloat(order.total || order.subtotal || 0).toLocaleString();
+            const itemCount = items.length;
+
+            // Progress step index (0-based)
+            const steps     = ['pending','processing','shipped','on_the_way','arriving','delivered'];
+            const stepIdx   = steps.indexOf(status);
+
+            const stepLabels = ['Placed','Processing','Shipped','On the Way','Arriving','Delivered'];
+
+            const progressHTML = status === 'cancelled'
+                ? `<div class="flex items-center gap-2 px-5 py-3 bg-red-50 border-t border-red-100">
+                       <span class="material-symbols-outlined text-red-500 text-[16px]">cancel</span>
+                       <span class="text-xs font-semibold text-red-600">This order was cancelled</span>
+                   </div>`
+                : `<div class="px-5 pt-4 pb-3 border-t border-slate-100">
+                       <div class="flex items-center gap-0">
+                           ${steps.map((s, i) => {
+                               const isDone    = i < stepIdx;
+                               const isCurrent = i === stepIdx;
+                               const dotClass  = isDone ? 'step-done' : isCurrent ? 'step-current' : 'step-todo';
+                               const lineClass = i < stepIdx ? 'step-line-done' : 'step-line-todo';
+                               return `
+                               <div class="flex flex-col items-center" style="flex:${i < steps.length-1 ? '1' : '0 0 auto'}">
+                                   <div class="flex items-center w-full">
+                                       <div class="w-3.5 h-3.5 rounded-full border-2 shrink-0 ${dotClass}
+                                           ${isCurrent ? 'ring-2 ring-green-200' : ''}"></div>
+                                       ${i < steps.length - 1
+                                           ? `<div class="flex-1 h-0.5 ${lineClass}"></div>`
+                                           : ''}
+                                   </div>
+                                   <span class="mt-1.5 text-[9px] font-medium ${isDone||isCurrent ? 'text-green-700' : 'text-slate-400'} whitespace-nowrap hidden sm:block">
+                                       ${stepLabels[i]}
+                                   </span>
+                               </div>`;
+                           }).join('')}
+                       </div>
+                   </div>`;
+
+            return `
+            <div class="order-card bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden accent-${status} cursor-pointer" data-order-id="${id}">
+
+                <!-- ── Card Header ── -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-6 pt-6 pb-5">
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-12 h-12 rounded-xl bg-green-50 border border-green-100 flex items-center justify-center shrink-0">
+                            <span class="material-symbols-outlined text-green-700 text-[24px]">receipt_long</span>
+                        </div>
+                        <div>
+                            <p class="font-bold text-slate-800 text-base font-mono tracking-wide">${escapeHtml(code)}</p>
+                            <div class="flex items-center gap-1.5 mt-1">
+                                <span class="material-symbols-outlined text-slate-400 text-[14px]">calendar_today</span>
+                                <span class="text-xs text-slate-500">${date}</span>
+                                <span class="text-slate-300">·</span>
+                                <span class="text-xs text-slate-500">${itemCount} item${itemCount !== 1 ? 's' : ''}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 shrink-0">
+                        <span class="badge-${status} inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold capitalize">
+                            ${statusLabel(status)}
+                        </span>
+                        <span class="text-xl font-black text-green-700">EGP ${total}</span>
+                    </div>
+                </div>
+
+                <!-- ── Progress ── -->
+                ${progressHTML}
+
+                <!-- â”€â”€ Delivery Rating (delivered only) â”€â”€ -->
+                ${status === 'delivered' ? `
+                <div id="delivery-rating-${id}" data-loaded="0" class="hidden"></div>
+                ` : ''}
+
+                <!-- ── Shipping Info ── -->
+                ${order.shipping_address?.street || order.contact_phone ? `
+                <div class="px-6 py-3.5 border-t border-slate-50 flex flex-wrap gap-x-5 gap-y-2">
+                    ${order.shipping_address?.street ? `
+                    <p class="flex items-center gap-1.5 text-xs text-slate-500">
+                        <span class="material-symbols-outlined text-[14px] text-slate-400">location_on</span>
+                        ${escapeHtml([order.shipping_address.street, order.shipping_address.city].filter(Boolean).join(', '))}
+                    </p>` : ''}
+                    ${order.contact_phone ? `
+                    <p class="flex items-center gap-1.5 text-xs text-slate-500">
+                        <span class="material-symbols-outlined text-[14px] text-slate-400">phone</span>
+                        ${escapeHtml(order.contact_phone)}
+                    </p>` : ''}
+                    ${order.notes ? `
+                    <p class="flex items-center gap-1.5 text-xs text-slate-500">
+                        <span class="material-symbols-outlined text-[14px] text-slate-400">sticky_note_2</span>
+                        ${escapeHtml(order.notes)}
+                    </p>` : ''}
+                </div>` : ''}
+
+                <!-- ── Toggle Button ── -->
+                ${itemCount > 0 ? `
+                <div class="px-6 py-4 border-t border-slate-100 flex items-center justify-between">
+                    <button data-toggle-items="${id}"
+                        class="flex items-center gap-2 text-sm font-semibold text-green-700 hover:text-green-800 group transition-all">
+                        <span class="w-7 h-7 rounded-lg bg-green-50 group-hover:bg-green-100 flex items-center justify-center transition-all">
+                            <span class="material-symbols-outlined chevron text-green-700 text-[18px]">expand_more</span>
+                        </span>
+                        <span data-toggle-label>View items</span>
+                    </button>
+                    <span class="text-xs text-slate-400">${itemCount} product${itemCount !== 1 ? 's' : ''}</span>
+                </div>
+
+                <!-- ── Items Panel ── -->
+                <div id="items-${id}" class="order-items-panel">
+                    <div class="bg-slate-50 border-t border-slate-100 px-6 py-5 flex flex-col gap-2">
+                        ${items.map((item, idx) => `
+                        <div class="flex items-center justify-between gap-3 py-3 ${idx < items.length - 1 ? 'border-b border-slate-100' : ''}">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-10 h-10 rounded-xl bg-white border border-green-100 flex items-center justify-center shrink-0 shadow-sm">
+                                    <span class="material-symbols-outlined text-green-600 text-[18px]">medication</span>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-semibold text-slate-800 truncate">${escapeHtml(item.product_name_snapshot || item.name || 'Product')}</p>
+                                    <p class="text-xs text-slate-400 mt-0.5">EGP ${parseFloat(item.unit_price || item.price || 0).toFixed(0)} × ${item.quantity}</p>
+                                </div>
+                            </div>
+                            <p class="text-sm font-bold text-green-700 shrink-0">EGP ${parseFloat(item.subtotal || (item.unit_price * item.quantity) || 0).toFixed(0)}</p>
+                        </div>`).join('')}
+
+                        <!-- Total row -->
+                        <div class="flex justify-between items-center pt-4 mt-1 border-t border-slate-200">
+                            <div class="flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-green-600 text-[18px]">payments</span>
+                                <span class="text-sm font-bold text-slate-700">Order Total</span>
+                            </div>
+                            <span class="text-lg font-black text-green-700">EGP ${total}</span>
+                        </div>
+                    </div>
+                </div>` : ''}
+
+            </div>`;
+        }
+
+        /* ──────────────────────────────────────────
+           setupTabs  — LOGIC UNCHANGED
+        ────────────────────────────────────────── */
+        function setupTabs() {
+            document.getElementById('status-tabs').addEventListener('click', e => {
+                const btn = e.target.closest('[data-status]');
+                if (!btn) return;
+                activeTab = btn.dataset.status;
+                document.querySelectorAll('.tab-btn').forEach(b => {
+                    b.classList.remove('active');
+                    b.classList.add('bg-white', 'text-slate-600');
+                });
+                btn.classList.add('active');
+                btn.classList.remove('bg-white', 'text-slate-600');
+                renderOrders(allOrders);
+            });
+        }
+
+        /* ──────────────────────────────────────────
+           statusLabel  — LOGIC UNCHANGED
+        ────────────────────────────────────────── */
+        function statusLabel(s) {
+            const map = {
+                pending:    'Pending',
+                processing: 'Processing',
+                shipped:    'Shipped',
+                on_the_way: 'On the Way',
+                arriving:   'Arriving',
+                delivered:  'Delivered',
+                cancelled:  'Cancelled',
+            };
+            return map[s] || s;
+        }
+
+        /* ──────────────────────────────────────────
+           escapeHtml  — LOGIC UNCHANGED
+        ────────────────────────────────────────── */
+        function escapeHtml(str) {
+            return String(str ?? '')
+                .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+                .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        /* ──────────────────────────────────────────
+           emptyState  — UI REDESIGNED, logic identical
+        ────────────────────────────────────────── */
+        function emptyState(tab) {
+            const isFiltered = tab !== 'all';
+            return `
+            <div class="flex flex-col items-center justify-center py-24 text-center gap-5">
+                <div class="relative">
+                    <div class="w-24 h-24 rounded-full bg-green-50 border-2 border-green-100 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-[44px] text-green-300">
+                            ${isFiltered ? 'filter_list_off' : 'shopping_basket'}
+                        </span>
+                    </div>
+                    ${!isFiltered ? `<div class="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-white border-2 border-green-100 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-green-500 text-[16px]">add</span>
+                    </div>` : ''}
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <p class="font-bold text-slate-700 text-lg">
+                        ${isFiltered ? `No ${tab} orders` : 'No orders yet'}
+                    </p>
+                    <p class="text-sm text-slate-400 max-w-xs mx-auto leading-relaxed">
+                        ${isFiltered
+                            ? 'No orders match this filter. Try a different status.'
+                            : 'You haven\'t placed any orders yet. Browse treatments to get started.'}
+                    </p>
+                </div>
+                ${!isFiltered ? `
+                <a href="treatmentsolutions.html"
+                    class="flex items-center gap-2 px-6 py-3 bg-green-700 text-white rounded-xl text-sm font-bold hover:bg-green-800 transition-all shadow-sm active:scale-[0.97]">
+                    <span class="material-symbols-outlined text-[18px]">local_pharmacy</span>
+                    Browse Treatments
+                </a>` : ''}
+            </div>`;
+        }
+
+        /* ──────────────────────────────────────────
+           errorState  — UI REDESIGNED, logic identical
+        ────────────────────────────────────────── */
+        function errorState(msg) {
+            return `
+            <div class="flex flex-col items-center justify-center py-24 text-center gap-4">
+                <div class="w-20 h-20 rounded-full bg-red-50 border-2 border-red-100 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-[38px] text-red-400">wifi_off</span>
+                </div>
+                <div>
+                    <p class="font-bold text-slate-700 text-base">Failed to load orders</p>
+                    <p class="text-xs text-slate-400 mt-1 max-w-xs mx-auto">${escapeHtml(msg)}</p>
+                </div>
+                <button onclick="loadOrders()"
+                    class="flex items-center gap-2 px-5 py-2.5 bg-green-700 text-white rounded-xl text-sm font-semibold hover:bg-green-800 transition-all shadow-sm active:scale-[0.97]">
+                    <span class="material-symbols-outlined text-[16px]">refresh</span> Try Again
+                </button>
+            </div>`;
+        }
+
+        /* ──────────────────────────────────────────
+           skeletonOrders  — UI REDESIGNED, logic identical
+        ────────────────────────────────────────── */
+        function skeletonOrders(n) {
+            return Array.from({ length: n }, (_, i) => `
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden"
+                 style="opacity:${1 - i * 0.15}">
+                <div class="px-5 pt-5 pb-4 flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                        <div class="skeleton w-11 h-11 rounded-xl"></div>
+                        <div class="flex flex-col gap-2">
+                            <div class="skeleton h-4 w-32 rounded"></div>
+                            <div class="skeleton h-3 w-24 rounded"></div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="skeleton h-6 w-20 rounded-full"></div>
+                        <div class="skeleton h-6 w-16 rounded"></div>
+                    </div>
+                </div>
+                <div class="px-5 pt-3 pb-4 border-t border-slate-50">
+                    <div class="flex items-center gap-2">
+                        ${[0,1,2,3,4,5].map(j => `
+                        <div class="flex items-center" style="flex:${j<5?'1':'0 0 auto'}">
+                            <div class="skeleton w-3.5 h-3.5 rounded-full shrink-0"></div>
+                            ${j<5 ? `<div class="flex-1 skeleton h-0.5 rounded"></div>` : ''}
+                        </div>`).join('')}
+                    </div>
+                </div>
+                <div class="px-5 py-3 border-t border-slate-50 flex justify-between">
+                    <div class="skeleton h-4 w-24 rounded"></div>
+                    <div class="skeleton h-4 w-12 rounded"></div>
+                </div>
+            </div>`).join('');
+        }
+        /* ──────────────────────────────────────────
+           Order Detail Modal
+        ────────────────────────────────────────── */
+        async function openOrderModal(order) {
+            const items   = order.items || [];
+            const date    = order.placed_at
+                ? new Date(order.placed_at).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })
+                : '—';
+            const id      = order._id || order.id || '';
+            const code    = order.order_code || ('#' + String(id).slice(-6).toUpperCase());
+            const status  = order.status || 'pending';
+            const calcSubtotal = () => {
+                if (Number.isFinite(+order.subtotal)) return +order.subtotal;
+                const sum = (items || []).reduce((acc, item) => {
+                    const unitPrice = +(item.unit_price ?? item.price ?? 0);
+                    const qty = +(item.quantity ?? 1);
+                    const lineTotal = +(item.subtotal ?? (unitPrice * qty) ?? 0);
+                    return acc + (Number.isFinite(lineTotal) ? lineTotal : 0);
+                }, 0);
+                return Number.isFinite(sum) ? sum : 0;
+            };
+            const subtotalValue = calcSubtotal();
+            const deliveryFeeValue = Number.isFinite(+order.delivery_fee) ? +order.delivery_fee : (Number.isFinite(+order.shipping_fee) ? +order.shipping_fee : 0);
+            const totalValue = Number.isFinite(+order.total) ? +order.total : (subtotalValue + deliveryFeeValue);
+            const total   = totalValue.toLocaleString();
+            const addr    = order.shipping_address || {};
+
+            // ── Inject content ──
+            document.getElementById('modal-code').textContent   = code;
+            document.getElementById('modal-date').textContent   = date;
+            document.getElementById('modal-total').textContent  = 'EGP ' + total;
+            document.getElementById('order-modal').dataset.orderId = id;
+            const subtotalEl = document.getElementById('modal-subtotal');
+            if (subtotalEl) subtotalEl.textContent = 'EGP ' + subtotalValue.toLocaleString();
+            const deliveryEl = document.getElementById('modal-delivery');
+            if (deliveryEl) deliveryEl.textContent = deliveryFeeValue ? ('EGP ' + deliveryFeeValue.toLocaleString()) : 'Free';
+            const itemsCountEl = document.getElementById('modal-items-count');
+            if (itemsCountEl) itemsCountEl.textContent = String(items.length || 0);
+            const totalInlineEl = document.getElementById('modal-total-inline');
+            if (totalInlineEl) totalInlineEl.textContent = 'EGP ' + total;
+
+            // Reset delivery rating UI
+            const rateWrap = document.getElementById('modal-rate-wrap');
+            const rateBtn  = document.getElementById('modal-rate-btn');
+            const ratingView = document.getElementById('modal-delivery-rating-view');
+            const ratingStars = document.getElementById('modal-delivery-rating-stars');
+            const ratingReview = document.getElementById('modal-delivery-rating-review');
+            if (rateWrap) rateWrap.classList.add('hidden');
+            if (ratingView) ratingView.classList.add('hidden');
+            if (ratingStars) ratingStars.innerHTML = '';
+            if (ratingReview) { ratingReview.classList.add('hidden'); ratingReview.textContent = ''; }
+            if (rateBtn) { rateBtn.disabled = true; rateBtn.onclick = null; }
+
+            // Status badge
+            const badgeEl = document.getElementById('modal-status');
+            badgeEl.textContent  = statusLabel(status);
+            badgeEl.className    = `badge-${status} inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold capitalize`;
+
+            // Shipping
+            const addrLine = [addr.street, addr.city, addr.state, addr.country].filter(Boolean).join(', ');
+            document.getElementById('modal-address').textContent = addrLine  || '—';
+            document.getElementById('modal-phone').textContent   = order.contact_phone || '—';
+
+            // Notes row
+            const notesRow = document.getElementById('modal-notes-row');
+            if (order.notes) {
+                notesRow.classList.remove('hidden');
+                document.getElementById('modal-notes').textContent = order.notes;
+            } else {
+                notesRow.classList.add('hidden');
+            }
+
+            // Items list
+            document.getElementById('modal-items').innerHTML = items.length
+                ? items.map((item, idx) => {
+                    const unitPrice = parseFloat(item.unit_price || item.price || 0);
+                    const qty       = item.quantity || 1;
+                    const subtotal  = parseFloat(item.subtotal || (unitPrice * qty) || 0);
+                    const name      = escapeHtml(item.product_name_snapshot || item.name || 'Product');
+                    const thumb     = item.product_image_snapshot || item.image || item.thumbnail || '';
+                    return `
+                    <div class="group flex items-center gap-4 px-4 py-4 bg-white ${idx < items.length - 1 ? 'border-b border-slate-100' : ''}">
+                        <div class="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center shrink-0 overflow-hidden">
+                            ${thumb ? ('<img src="' + escapeHtml(thumb) + '" alt="" class="w-full h-full object-cover" />') : ('<span class="material-symbols-outlined text-green-700 text-[20px]">local_florist</span>')}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-start justify-between gap-3">
+                                <p class="text-sm font-semibold text-slate-900 truncate">${name}</p>
+                                <span class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-50 text-green-800 border border-green-100 text-[11px] font-semibold whitespace-nowrap">
+                                    <span class="material-symbols-outlined text-[14px]">shopping_cart</span>
+                                    x${qty}
+                                </span>
+                            </div>
+                            <p class="text-xs text-slate-400 mt-1">EGP ${unitPrice.toFixed(0)} <span class="text-slate-300">&middot;</span> ${qty} unit${qty > 1 ? 's' : ''}</p>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <p class="text-sm font-black text-green-800">EGP ${subtotal.toFixed(0)}</p>
+                            <p class="text-[11px] text-slate-400 mt-0.5">${(subtotal / Math.max(1, qty)).toFixed(0)} / unit</p>
+                        </div>
+                    </div>`;
+                }).join('')
+                : `<div class="px-4 py-8 text-center">
+                       <span class="material-symbols-outlined text-slate-300 text-[32px] block mb-2">inventory_2</span>
+                       <p class="text-sm text-slate-400">No item details available</p>
+                   </div>`;
+
+            // Show modal
+            document.getElementById('order-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+
+            // Delivered orders: allow rating delivery company + show previous rating
+            if (status === 'delivered' && id) {
+                const [ratingsRes, deliveryRes] = await Promise.allSettled([
+                    api.get(`/orders/${id}/ratings`),
+                    api.get(`/orders/${id}/delivery`),
+                ]);
+
+                let existing = null;
+                if (ratingsRes.status === 'fulfilled') {
+                    const ratings = ratingsRes.value?.data || [];
+                    existing = ratings.find(r => r.target_type === 'delivery_company') || null;
+                }
+
+                if (existing && ratingView && ratingStars) {
+                    ratingView.classList.remove('hidden');
+                    renderStars(ratingStars, Number(existing.stars || 0));
+                    if (ratingReview) {
+                        const rv = (existing.review || '').trim();
+                        if (rv) {
+                            ratingReview.classList.remove('hidden');
+                            ratingReview.textContent = `"${rv}"`;
+                        }
+                    }
+                } else {
+                    const delivery = deliveryRes.status === 'fulfilled' ? (deliveryRes.value?.data || null) : null;
+                    const deliveryCompanyId =
+                        delivery?.delivery_company_id?._id ||
+                        delivery?.delivery_company_id ||
+                        delivery?.delivery_company?._id ||
+                        null;
+
+                    if (deliveryCompanyId && rateWrap && rateBtn) {
+                        rateWrap.classList.remove('hidden');
+                        rateBtn.disabled = false;
+                        rateBtn.onclick = () => openDeliveryRateModal(id, deliveryCompanyId);
+                    }
+                }
+            }
+        }
+
+        function closeOrderModal() {
+            document.getElementById('order-modal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        // ESC key closes modal
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeOrderModal();
+        });
+    </script>
+
+    <!-- ══════════════════════════════════════════
+         Order Detail Modal
+    ══════════════════════════════════════════ -->
+    <div id="order-modal" class="hidden fixed inset-0 z-[80] flex items-center justify-center p-4">
+
+        <!-- Overlay -->
+        <div onclick="closeOrderModal()" class="modal-overlay absolute inset-0"></div>
+
+        <!-- Panel -->
+        <div id="order-modal-panel" class="relative bg-white rounded-3xl w-full max-w-3xl flex flex-col overflow-hidden" style="max-height:90vh">
+
+            <!-- Modal Header -->
+            <div class="relative shrink-0 border-b border-slate-100">
+                <div class="absolute inset-0 bg-gradient-to-br from-green-50 via-white to-emerald-50"></div>
+                <div class="absolute -top-24 -left-20 w-72 h-72 rounded-full bg-green-200/20 blur-3xl"></div>
+                <div class="absolute -bottom-28 -right-24 w-80 h-80 rounded-full bg-emerald-200/20 blur-3xl"></div>
+                <div class="relative flex items-center justify-between px-7 py-6">
+                    <div class="flex items-center gap-4 min-w-0">
+                        <div class="w-12 h-12 rounded-2xl bg-white/80 border border-green-100 shadow-sm flex items-center justify-center shrink-0">
+                            <span class="material-symbols-outlined text-green-700 text-[22px]">receipt_long</span>
+                        </div>
+                        <div class="min-w-0">
+                            <p id="modal-code" class="font-extrabold text-slate-900 text-base sm:text-lg font-mono tracking-wide truncate"></p>
+                            <p id="modal-date" class="text-xs text-slate-500 mt-1"></p>
+                            <div class="mt-2 flex flex-wrap items-center gap-2">
+                                <span id="modal-status"></span>
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-white/70 border border-slate-200 text-slate-700">
+                                    <span class="material-symbols-outlined text-[14px]">inventory_2</span>
+                                    <span id="modal-items-count">0</span> items
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="closeOrderModal()" class="w-10 h-10 rounded-full bg-white/80 hover:bg-white border border-slate-200 shadow-sm flex items-center justify-center transition-colors active:scale-95">
+                        <span class="material-symbols-outlined text-slate-600 text-[20px]">close</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Body (scrollable) -->
+            <div id="order-modal-body" class="overflow-y-auto flex-1 px-7 py-6 flex flex-col gap-6 bg-[linear-gradient(180deg,rgba(248,250,252,0.75),rgba(255,255,255,1))]">
+
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-5">
+                    <!-- Delivery Info -->
+                    <div class="md:col-span-7 bg-white/90 rounded-2xl border border-slate-200 shadow-sm px-5 py-5 flex flex-col gap-4">
+                        <div class="flex items-center justify-between">
+                            <p class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">Delivery Details</p>
+                            <span class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-600">
+                                <span class="material-symbols-outlined text-[16px]">local_shipping</span>
+                                Shipping
+                            </span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="flex items-start gap-3">
+                                <div class="w-9 h-9 rounded-xl bg-green-50 border border-green-100 flex items-center justify-center shrink-0 mt-0.5">
+                                    <span class="material-symbols-outlined text-green-700 text-[16px]">location_on</span>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-semibold text-slate-400 mb-1">Shipping Address</p>
+                                    <p id="modal-address" class="text-sm font-semibold text-slate-900 leading-snug"></p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <div class="w-9 h-9 rounded-xl bg-green-50 border border-green-100 flex items-center justify-center shrink-0 mt-0.5">
+                                    <span class="material-symbols-outlined text-green-700 text-[16px]">phone</span>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-semibold text-slate-400 mb-1">Phone</p>
+                                    <p id="modal-phone" class="text-sm font-semibold text-slate-900"></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="modal-notes-row" class="hidden flex items-start gap-3 pt-4 border-t border-slate-100">
+                            <div class="w-9 h-9 rounded-xl bg-green-50 border border-green-100 flex items-center justify-center shrink-0 mt-0.5">
+                                <span class="material-symbols-outlined text-green-700 text-[16px]">sticky_note_2</span>
+                            </div>
+                            <div>
+                                <p class="text-xs font-semibold text-slate-400 mb-1">Notes</p>
+                                <p id="modal-notes" class="text-sm font-semibold text-slate-900 leading-snug"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Summary -->
+                    <div class="md:col-span-5 bg-white/90 rounded-2xl border border-slate-200 shadow-sm px-5 py-5">
+                        <p class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-4">Summary</p>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-slate-500">Subtotal</span>
+                                <span id="modal-subtotal" class="text-sm font-bold text-slate-900">EGP 0</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-slate-500">Delivery</span>
+                                <span id="modal-delivery" class="text-sm font-bold text-slate-900">Free</span>
+                            </div>
+                            <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                                <span class="text-sm font-extrabold text-slate-900">Total</span>
+                                <span id="modal-total-inline" class="text-lg font-black text-green-800"></span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-4">Includes all items &middot; Free delivery when available</p>
+
+                        <!-- Delivery rating view / action (delivered only) -->
+                        <div id="modal-delivery-rating-view" class="hidden mt-4 rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
+                            <div class="flex items-center justify-between gap-3">
+                                <p class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">Delivery Rating</p>
+                                <div id="modal-delivery-rating-stars" class="flex items-center gap-0.5"></div>
+                            </div>
+                            <p id="modal-delivery-rating-review" class="hidden mt-2 text-sm text-slate-700 italic leading-relaxed"></p>
+                        </div>
+
+                        <div id="modal-rate-wrap" class="hidden mt-4">
+                            <button id="modal-rate-btn" type="button"
+                                class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-[#0F9D58] text-white font-semibold shadow-sm hover:brightness-[0.98] active:scale-[0.99] transition-all">
+                                <span class="material-symbols-outlined text-[18px]">star</span>
+                                Rate Delivery
+                            </button>
+                        </div>
+
+                        <!-- PlantDoc rating (farmer only) -->
+                        <div class="mt-3">
+                            <a href="/frontend/farmer/ratePlantDoc.html"
+                                class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl border border-slate-200 bg-white text-slate-800 font-semibold shadow-sm hover:bg-slate-50 active:scale-[0.99] transition-all">
+                                <span class="material-symbols-outlined text-[18px] text-[#0F9D58]">rate_review</span>
+                                Rate Plant Doc
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Items -->
+                <div>
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">Order Items</p>
+                    <div id="modal-items" class="flex flex-col rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm"></div>
+                </div>
+
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="shrink-0 px-7 py-5 border-t border-slate-100 bg-white flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-green-50 border border-green-100 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-green-700 text-[18px]">payments</span>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500 font-semibold">Order Total</p>
+                        <p class="text-xs text-slate-400 mt-0.5">Incl. all items &middot; Free delivery</p>
+                    </div>
+                </div>
+                <span id="modal-total" class="text-2xl font-black text-green-800"></span>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         Rate Delivery Modal
+    ══════════════════════════════════════════ -->
+    <div id="delivery-rate-modal" class="hidden fixed inset-0 z-[90] flex items-center justify-center p-4">
+        <div class="modal-overlay absolute inset-0" onclick="closeDeliveryRateModal()"></div>
+
+        <div id="delivery-rate-panel" class="relative bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden border border-slate-200">
+            <div class="px-6 py-5 border-b border-slate-100 bg-gradient-to-br from-green-50 via-white to-emerald-50">
+                <div class="flex items-start justify-between gap-4">
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-11 h-11 rounded-2xl bg-white/80 border border-green-100 shadow-sm flex items-center justify-center shrink-0">
+                            <span class="material-symbols-outlined text-[#0F9D58] text-[22px]">local_shipping</span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-extrabold text-slate-900">Rate Delivery</p>
+                            <p class="text-xs text-slate-500 mt-0.5">Help us improve delivery quality</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="closeDeliveryRateModal()" class="w-9 h-9 rounded-full bg-white/80 hover:bg-white border border-slate-200 shadow-sm flex items-center justify-center transition-colors active:scale-95">
+                        <span class="material-symbols-outlined text-slate-600 text-[20px]">close</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="px-6 py-6 space-y-5">
+                <div>
+                    <p class="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-3">Your Rating</p>
+                    <div id="delivery-rate-stars" class="flex items-center gap-2">
+                        <button type="button" class="rate-star w-12 h-12 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-200 flex items-center justify-center" data-rate-star="1">
+                            <span class="material-symbols-outlined text-[28px]">star</span>
+                        </button>
+                        <button type="button" class="rate-star w-12 h-12 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-200 flex items-center justify-center" data-rate-star="2">
+                            <span class="material-symbols-outlined text-[28px]">star</span>
+                        </button>
+                        <button type="button" class="rate-star w-12 h-12 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-200 flex items-center justify-center" data-rate-star="3">
+                            <span class="material-symbols-outlined text-[28px]">star</span>
+                        </button>
+                        <button type="button" class="rate-star w-12 h-12 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-200 flex items-center justify-center" data-rate-star="4">
+                            <span class="material-symbols-outlined text-[28px]">star</span>
+                        </button>
+                        <button type="button" class="rate-star w-12 h-12 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-200 flex items-center justify-center" data-rate-star="5">
+                            <span class="material-symbols-outlined text-[28px]">star</span>
+                        </button>
+                    </div>
+                    <p id="delivery-rate-hint" class="mt-2 text-xs text-slate-500">Tap a star to rate</p>
+                </div>
+
+                <div>
+                    <p class="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-2">Review (optional)</p>
+                    <textarea id="delivery-rate-review" rows="3" placeholder="Fast delivery, professional, etc..."
+                        class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50/60 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0F9D58]/25 focus:border-[#0F9D58] transition-all resize-none"></textarea>
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="closeDeliveryRateModal()"
+                        class="flex-1 px-4 py-3 rounded-2xl border border-slate-200 bg-white text-slate-700 font-semibold hover:bg-slate-50 transition-all active:scale-[0.99]">
+                        Cancel
+                    </button>
+                    <button id="delivery-rate-submit" type="button"
+                        class="flex-1 px-4 py-3 rounded-2xl bg-[#0F9D58] text-white font-semibold shadow-sm hover:brightness-[0.98] transition-all active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed">
+                        Submit
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
