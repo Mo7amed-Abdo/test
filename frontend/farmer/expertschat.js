@@ -13,7 +13,6 @@ let _selectedChatIds = new Set();
 document.addEventListener('DOMContentLoaded', async () => {
   if (!requireAuth('farmer')) return;
   populateSidebarUser();
-  lockSidebarAvatar();
   setupLogout(_socket);
   await loadChats();
   setupChatSearch();
