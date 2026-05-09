@@ -32,7 +32,8 @@ const userSchema = new mongoose.Schema(
       },
       default: 'local',
     },
-    google_sub: { type: String, default: null },
+    // Only set for Google-auth users. Keep it unset for local users to avoid unique collisions on null.
+    google_sub: { type: String },
     password_reset_code_hash: { type: String, default: null, select: false },
     password_reset_expires_at: { type: Date, default: null },
     role: {
@@ -54,9 +55,12 @@ const userSchema = new mongoose.Schema(
 );
 
 // ─── Indexes ──────────────────────────────────────────────────────────────────
-userSchema.index({ email: 1 }, { unique: true });
 userSchema.index({ role: 1 });
-userSchema.index({ google_sub: 1 }, { unique: true, sparse: true });
+// Unique ONLY when google_sub is a real string value (avoid duplicate null/undefined collisions).
+userSchema.index(
+  { google_sub: 1 },
+  { unique: true, partialFilterExpression: { google_sub: { $type: 'string' } } }
+);
 
 // ─── Hooks ────────────────────────────────────────────────────────────────────
 // Hash password before saving
