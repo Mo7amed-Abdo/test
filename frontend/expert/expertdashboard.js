@@ -227,7 +227,7 @@ function connectExpertDashboardSocket() {
     return;
   }
 
-  expertDashboardSocket = io('http://localhost:4000', { auth: { token: Auth.getToken() } });
+  expertDashboardSocket = io((window.PLANTDOC_API_ORIGIN || 'http://localhost:4000'), { auth: { token: Auth.getToken() } });
   setupLogout(expertDashboardSocket);
 
   expertDashboardSocket.on('notification:new', (notification) => {

@@ -860,7 +860,7 @@ async function markAllProductNotificationsRead() {
 function connectProductNotificationSocket() {
   if (typeof io === 'undefined') return;
 
-  _productNotificationSocket = io('http://localhost:4000', { auth: { token: Auth.getToken() } });
+  _productNotificationSocket = io((window.PLANTDOC_API_ORIGIN || 'http://localhost:4000'), { auth: { token: Auth.getToken() } });
   _productNotificationSocket.on('connect', () => renderProductNotifications());
   _productNotificationSocket.on('disconnect', () => renderProductNotifications());
   _productNotificationSocket.on('notification:new', (notification) => {

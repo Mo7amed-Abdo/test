@@ -1,7 +1,43 @@
 // ─── PlantDoc Shared API Utility ─────────────────────────────────────────────
 // Used by every page across all roles. Load this FIRST on every page.
 
-const API_BASE = 'http://localhost:4000/api';
+// API Base URL selection:
+// - Local development (Express serves /frontend/*): http://localhost:4000/api
+// - Production (Vercel): https://plantdoc-api.up.railway.app/api
+//
+// Optional override:
+//   window.__APP_CONFIG__ = { API_BASE: 'https://...' }
+// This keeps the project static (no bundler/env needed) and avoids any UI changes.
+const DEFAULT_LOCAL_API_BASE = 'http://localhost:4000/api';
+const DEFAULT_PROD_API_BASE = 'https://plantdoc-api.up.railway.app/api';
+
+function resolveApiBase() {
+  try {
+    const override = (typeof window !== 'undefined' && window.__APP_CONFIG__ && window.__APP_CONFIG__.API_BASE)
+      ? String(window.__APP_CONFIG__.API_BASE).trim()
+      : '';
+    if (override) return override.replace(/\/+$/, '');
+
+    const host = (typeof window !== 'undefined' && window.location && window.location.hostname)
+      ? String(window.location.hostname).toLowerCase()
+      : '';
+    const isLocal =
+      host === 'localhost' ||
+      host === '127.0.0.1' ||
+      host === '0.0.0.0' ||
+      host === '::1';
+    return isLocal ? DEFAULT_LOCAL_API_BASE : DEFAULT_PROD_API_BASE;
+  } catch (_) {
+    return DEFAULT_LOCAL_API_BASE;
+  }
+}
+
+const API_BASE = resolveApiBase();
+// Expose origin for Socket.IO and asset URL resolution in other scripts without changing HTML.
+if (typeof window !== 'undefined') {
+  window.PLANTDOC_API_BASE = API_BASE;
+  window.PLANTDOC_API_ORIGIN = API_BASE.replace(/\/api\/?$/, '');
+}
 
 function ensureBrandLogoTheme() {
   if (!document.head) return;

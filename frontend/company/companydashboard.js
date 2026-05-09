@@ -379,7 +379,7 @@ async function markAllDashboardNotificationsRead() {
 
 function connectDashboardNotificationSocket() {
   if (typeof io === 'undefined') return;
-  _dashboardNotificationSocket = io('http://localhost:4000', { auth: { token: Auth.getToken() } });
+  _dashboardNotificationSocket = io((window.PLANTDOC_API_ORIGIN || 'http://localhost:4000'), { auth: { token: Auth.getToken() } });
   _dashboardNotificationSocket.on('connect', () => renderDashboardNotifications());
   _dashboardNotificationSocket.on('disconnect', () => renderDashboardNotifications());
   _dashboardNotificationSocket.on('notification:new', (notification) => {
