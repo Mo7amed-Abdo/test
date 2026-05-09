@@ -70,7 +70,8 @@ function setupForms() {
       showToast('Profile updated!', 'success');
 
       const res = await api.get('/delivery/profile');
-      Auth.setSession({ token: Auth.getToken(), user: res.data });
+      // Keep existing auth session intact; only refresh cached profile so avatar/logo updates everywhere.
+      localStorage.setItem('plantdoc_profile', JSON.stringify(res.data));
       populateSidebarUser();
       setText('[data-company-name-card]', res.data.company_name || res.data.full_name);
     } catch (err) {
