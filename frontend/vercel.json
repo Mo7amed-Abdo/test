@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/frontend/:path*",
+      "destination": "/:path*"
+    },
+    {
+      "source": "/expert/cases",
+      "destination": "/expert/expertCases.html"
+    },
+    {
+      "source": "/expert/profile",
+      "destination": "/expert/expertProfile.html"
+    }
+  ]
+}
