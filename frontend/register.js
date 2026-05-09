@@ -20,15 +20,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setLoading(true, 'Creating account...');
     try {
-      const body = new FormData();
-      body.append('full_name', full_name);
-      body.append('email',     email);
-      body.append('password',  password);
-      body.append('role',      role);
+      const body = {
+        full_name,
+        email,
+        password,
+        role,
+      };
 
       // Optional role-specific fields
       const extras = ['phone','location','specialization','years_experience','expertise_tags','company_name','company_address','company_phone','company_email','company_description'];
-      extras.forEach(k => { const el = document.getElementById(k); if (el?.value.trim()) body.append(k, el.value.trim()); });
+      extras.forEach(k => {
+        const el = document.getElementById(k);
+        const v = el?.value?.trim();
+        if (v) body[k] = v;
+      });
 
       const res = await api.post('/auth/register', body);
       Auth.setSession(res.data);
